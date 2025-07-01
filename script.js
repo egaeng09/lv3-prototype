@@ -165,6 +165,7 @@ function getMentors() {
   let selectedMentor = null
   let messages = []
   let currentPostId = null
+  let currentCategory = "all"
   
   // DOM 요소들
   const views = {
@@ -912,7 +913,8 @@ function getMentors() {
       setLikedPosts(likedPosts)
       setLikesMap(likesMap)
   
-      loadCommunityPosts()
+      // 전체가 아닌 현재 탭 기준으로 목록 갱신
+      filterCommunityByCategory(currentCategory)
       setTimeout(() => {
         initializeLucideIcons()
       }, 0)
@@ -1358,6 +1360,7 @@ function getMentors() {
         this.classList.add("active")
   
         const category = this.getAttribute("data-category")
+        currentCategory = category
         filterCommunityByCategory(category)
       })
     })
