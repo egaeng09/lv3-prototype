@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우아한 커피챗</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Main View -->
+        <div id="main-view" class="view active">
+            <!-- Header -->
+            <header class="glass-header border-b sticky top-0 z-50">
+                <div class="max-w-6xl mx-auto px-4">
+                    <div class="flex items-center justify-between py-4 min-h-16">
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 gradient-button rounded-xl flex items-center justify-center text-white">
+                                    <i data-lucide="coffee"></i>
+                                </div>
+                                <div>
+                                    <h1 class="text-xl font-bold text-gray-800">우아한 커피챗</h1>
+                                    <p class="text-sm text-gray-600">개발자 멘토링 플랫폼</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-sm font-medium">
+                            Beta v1.0
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Hero Section -->
+            <section class="py-12 text-center">
+                <div class="max-w-6xl mx-auto px-4">
+                    <div class="max-w-3xl mx-auto">
+                        <h2 class="text-5xl font-bold mb-6 leading-tight">
+                            시니어 개발자와 함께하는 <span class="gradient-text">커피챗</span>
+                        </h2>
+                        <p class="text-xl text-gray-600 mb-8">
+                            궁금한 것이 있다면 언제든지 물어보세요. 경험 많은 시니어 개발자들이 친절하게 답변해드립니다.
+                        </p>
+                        <div class="flex gap-4 justify-center flex-wrap">
+                            <button id="start-coffee-chat" class="gradient-button text-white px-8 py-4 h-auto shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 rounded-xl">
+                                <i data-lucide="coffee" class="w-5 h-5 mr-2"></i>
+                                커피챗 시작하기
+                                <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                            </button>
+                            <button id="join-community" class="community-button bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 h-auto shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 rounded-xl">
+                                <i data-lucide="users" class="w-5 h-5 mr-2"></i>
+                                커뮤니티 참여
+                                <i data-lucide="external-link" class="w-5 h-5 ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="py-16">
+                <div class="max-w-6xl mx-auto px-4">
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="bg-white p-8 rounded-2xl border border-orange-100 text-center card-hover">
+                            <div class="w-12 h-12 gradient-button rounded-full flex items-center justify-center mx-auto mb-4 text-white">
+                                <i data-lucide="message-circle" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">실시간 채팅</h3>
+                            <p class="text-gray-600">시니어 개발자와 실시간으로 소통하며 궁금한 점을 해결하세요.</p>
+                        </div>
+                        <div class="bg-white p-8 rounded-2xl border border-orange-100 text-center card-hover">
+                            <div class="w-12 h-12 gradient-button rounded-full flex items-center justify-center mx-auto mb-4 text-white">
+                                <i data-lucide="briefcase" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">커리어 상담</h3>
+                            <p class="text-gray-600">이직, 성장, 기술 스택 등 커리어 관련 조언을 받아보세요.</p>
+                        </div>
+                        <div class="bg-white p-8 rounded-2xl border border-orange-100 text-center card-hover">
+                            <div class="w-12 h-12 gradient-button rounded-full flex items-center justify-center mx-auto mb-4 text-white">
+                                <i data-lucide="star" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">검증된 멘토</h3>
+                            <p class="text-gray-600">경력과 평점이 검증된 시니어 개발자들과 만나보세요.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Mentor List View -->
+        <div id="mentor-list-view" class="view">
+            <header class="glass-header border-b sticky top-0 z-50">
+                <div class="max-w-6xl mx-auto px-4">
+                    <div class="flex items-center justify-between py-4 min-h-16">
+                        <div class="flex items-center gap-4">
+                            <button id="back-to-main" class="text-gray-600 hover:bg-orange-100 rounded-lg p-2">
+                                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                            </button>
+                            <div>
+                                <h1 class="text-xl font-bold text-gray-800">멘토 찾기</h1>
+                                <p class="text-sm text-gray-600">함께할 시니어 개발자를 선택해보세요</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="max-w-6xl mx-auto px-4 py-8">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">추천 멘토</h2>
+                    <p class="text-gray-600" id="online-count">
+                        멘토 정보를 불러오는 중...
+                    </p>
+                </div>
+
+                <div id="mentor-grid" class="grid lg:grid-cols-2 gap-6">
+                    <!-- 멘토 카드들이 여기에 동적으로 추가됩니다 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat View -->
+        <div id="chat-view" class="view">
+            <header class="glass-header border-b sticky top-0 z-50">
+                <div class="max-w-6xl mx-auto px-4">
+                    <div class="flex items-center justify-between py-4 min-h-16">
+                        <div class="flex items-center gap-4">
+                            <button id="back-to-list" class="text-gray-600 hover:bg-orange-100 rounded-lg p-2">
+                                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                            </button>
+                            <div id="chat-mentor-info" class="flex items-center gap-3">
+                                <!-- 멘토 정보가 여기에 동적으로 추가됩니다 -->
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 video-box">
+                            <button id="video-call-btn" class="video-call-btn bg-orange-100 hover:bg-orange-200 text-orange-600 p-3 rounded-lg transition-colors duration-300" title="화상 통화 시작">
+                                <i data-lucide="video" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chat-messages" style="height: calc(100vh - 160px);">
+                <!-- 메시지들이 여기에 동적으로 추가됩니다 -->
+            </div>
+
+            <div class="bg-white border-t border-orange-100 p-4">
+                <div class="flex gap-3 max-w-4xl mx-auto">
+                    <input
+                        type="text"
+                        id="chat-input"
+                        placeholder="메시지를 입력하세요..."
+                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                        maxlength="500"
+                    />
+                    <button 
+                        id="send-message"
+                        class="gradient-button text-white shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 px-4 py-2 rounded-lg"
+                    >
+                        <i data-lucide="send" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Community View -->
+        <div id="community-view" class="view">
+            <header class="glass-header border-b sticky top-0 z-50">
+                <div class="max-w-6xl mx-auto px-4">
+                    <div class="flex items-center justify-between py-4 min-h-16">
+                        <div class="flex items-center gap-4">
+                            <button id="back-to-main-from-community" class="text-gray-600 hover:bg-orange-100 rounded-lg p-2">
+                                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                            </button>
+                            <div>
+                                <h1 class="text-xl font-bold text-gray-800">커뮤니티</h1>
+                                <p class="text-sm text-gray-600">질문을 남기고 답변을 받아보세요</p>
+                            </div>
+                        </div>
+                        <button id="go-to-post-create" class="gradient-button text-white shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 px-4 py-2 rounded-lg">
+                            <i data-lucide="edit-3" class="w-4 h-4 mr-2"></i>
+                            게시글 작성
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 카테고리 탭 메뉴 -->
+            <nav id="community-category-tabs" class="flex gap-2 justify-center py-4 bg-white border-b border-orange-100 sticky top-[64px] z-40">
+                <button class="category-tab-btn px-4 py-2 rounded-lg font-medium text-gray-600 bg-orange-50 hover:bg-orange-100 active" data-category="all">전체</button>
+                <button class="category-tab-btn px-4 py-2 rounded-lg font-medium text-gray-600 bg-orange-50 hover:bg-orange-100" data-category="question">질문</button>
+                <button class="category-tab-btn px-4 py-2 rounded-lg font-medium text-gray-600 bg-orange-50 hover:bg-orange-100" data-category="discussion">토론</button>
+                <button class="category-tab-btn px-4 py-2 rounded-lg font-medium text-gray-600 bg-orange-50 hover:bg-orange-100" data-category="sharing">정보공유</button>
+                <button class="category-tab-btn px-4 py-2 rounded-lg font-medium text-gray-600 bg-orange-50 hover:bg-orange-100" data-category="review">코드리뷰</button>
+            </nav>
+
+            <div class="max-w-4xl mx-auto px-4 py-8">
+                <div id="community-feed" class="space-y-6">
+                    <!-- 게시글들이 여기에 동적으로 추가됩니다 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Post Create View -->
+        <div id="post-create-view" class="view">
+            <header class="glass-header border-b sticky top-0 z-50">
+                <div class="max-w-6xl mx-auto px-4">
+                    <div class="flex items-center justify-between py-4 min-h-16">
+                        <div class="flex items-center gap-4">
+                            <button id="back-to-community" class="text-gray-600 hover:bg-orange-100 rounded-lg p-2">
+                                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                            </button>
+                            <div>
+                                <h1 class="text-xl font-bold text-gray-800">게시글 작성</h1>
+                                <p class="text-sm text-gray-600">커뮤니티에 질문이나 정보를 공유해보세요</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="max-w-4xl mx-auto px-4 py-8">
+                <form id="post-create-form" class="bg-white border border-orange-100 rounded-2xl p-8 shadow-sm">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="text-sm font-semibold text-gray-700 block mb-2">제목</label>
+                            <input 
+                                type="text" 
+                                id="post-title" 
+                                placeholder="궁금한 점이나 공유하고 싶은 내용의 제목을 입력해주세요"
+                                class="w-full text-lg px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-semibold text-gray-700 block mb-2">카테고리</label>
+                            <select id="post-category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
+                                <option value="question">질문</option>
+                                <option value="discussion">토론</option>
+                                <option value="sharing">정보공유</option>
+                                <option value="review">코드리뷰</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-semibold text-gray-700 block mb-2">내용</label>
+                            <textarea 
+                                id="post-content" 
+                                placeholder="구체적인 상황이나 궁금한 점을 자세히 설명해주세요. 코드가 있다면 함께 공유해주세요."
+                                class="w-full min-h-[300px] resize-none px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                                required
+                            ></textarea>
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-semibold text-gray-700 block mb-2">태그</label>
+                            <input 
+                                type="text" 
+                                id="post-tags" 
+                                placeholder="관련 기술이나 키워드를 쉼표로 구분해서 입력해주세요 (예: React, JavaScript, CSS)"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                            />
+                            <p class="text-sm text-gray-500 mt-1">태그를 추가하면 관련 전문가들이 더 쉽게 찾을 수 있습니다.</p>
+                        </div>
+
+                        <div class="flex items-center gap-4 pt-4">
+                            <button 
+                                type="submit" 
+                                class="gradient-button text-white shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 px-6 py-3 rounded-lg"
+                            >
+                                <i data-lucide="send" class="w-5 h-5 mr-2"></i>
+                                게시글 등록
+                            </button>
+                            <button 
+                                type="button" 
+                                id="cancel-post"
+                                class="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-3 rounded-lg"
+                            >
+                                취소
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Writing Tips Card -->
+                <div class="mt-8 bg-orange-50 border border-orange-200 rounded-2xl p-6">
+                    <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-800 mb-4">
+                        <i data-lucide="lightbulb" class="w-5 h-5 text-orange-600"></i>
+                        좋은 게시글 작성 팁
+                    </h3>
+                    <ul class="space-y-2 text-gray-600">
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                            <span>구체적인 상황과 문제점을 명확하게 설명해주세요</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                            <span>관련 코드나 에러 메시지가 있다면 함께 공유해주세요</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                            <span>시도해본 해결 방법들을 미리 언급해주세요</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                            <span>적절한 태그를 사용해서 전문가들의 관심을 끌어보세요</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Post Detail View -->
+        <div id="post-detail-view" class="view">
+            <header class="glass-header border-b sticky top-0 z-50">
+                <div class="max-w-6xl mx-auto px-4">
+                    <div class="flex items-center justify-between py-4 min-h-16">
+                        <div class="flex items-center gap-4">
+                            <button id="back-to-community-from-detail" class="text-gray-600 hover:bg-orange-100 rounded-lg p-2">
+                                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                            </button>
+                            <div>
+                                <h1 class="text-xl font-bold text-gray-800">게시글</h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="max-w-4xl mx-auto px-4 py-8">
+                <div id="post-detail-content" class="space-y-8">
+                    <!-- 게시글 상세와 댓글이 여기에 동적으로 추가됩니다 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Video Call Modal -->
+        <div id="video-call-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
+            <div class="video-modal bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="video" class="w-8 h-8 text-orange-600"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">화상 통화</h3>
+                    <p class="text-gray-600 mb-6" id="video-call-mentor-name">멘토와 화상 통화를 시작하시겠습니까?</p>
+                    <div class="flex gap-3">
+                        <button id="cancel-video-call" class="video-modal-btn flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors">
+                            취소
+                        </button>
+                        <button id="start-video-call" class="video-modal-btn flex-1 gradient-button text-white py-3 px-4 rounded-lg">
+                            <i data-lucide="video" class="w-4 h-4 mr-2"></i>
+                            통화 시작
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Video Call Screen -->
+        <div id="video-call-screen" class="fixed inset-0 bg-black z-50 hidden flex-col">
+            <div class="flex-1 relative bg-gray-900">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center text-white">
+                        <div class="w-32 h-32 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="user" class="w-16 h-16 text-orange-600"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2" id="call-mentor-name">멘토 이름</h3>
+                        <p class="text-gray-300" id="call-duration">00:00</p>
+                    </div>
+                </div>
+
+                <!-- Call Controls -->
+                <div class="absolute bottom-8 left-1/2 translate-x-center video-call-controls">
+                    <div class="flex items-center gap-4">
+                        <button id="mute-btn" class="w-12 h-12 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center text-white transition-colors">
+                            <i data-lucide="mic" class="w-5 h-5"></i>
+                        </button>
+                        <button id="camera-btn" class="w-12 h-12 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center text-white transition-colors">
+                            <i data-lucide="video" class="w-5 h-5"></i>
+                        </button>
+                        <button id="end-call-btn" class="w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white transition-colors">
+                            <i data-lucide="phone-off" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 커피챗 종료 확인 모달 -->
+        <div id="coffeechat-end-confirm-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="phone-off" class="w-8 h-8 text-orange-600"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">커피챗 종료</h3>
+                    <p class="text-gray-600 mb-6">정말 커피챗을 종료하시겠습니까?</p>
+                    <div class="flex gap-3 justify-center">
+                        <button id="cancel-end-coffeechat" class="modal-cancel-btn">아니오</button>
+                        <button id="confirm-end-coffeechat" class="modal-confirm-btn">예</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 커피챗 평가 모달 -->
+        <div id="coffeechat-eval-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="star" class="w-8 h-8 text-orange-600"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-gray-800">커피챗 평가</h2>
+                    <p class="text-gray-600 text-sm mt-2">멘토와의 커피챗은 어떠셨나요?</p>
+                </div>
+
+                <form id="coffeechat-eval-form">
+                    <div class="mb-6">
+                        <label class="block mb-3 font-semibold text-gray-700">별점을 선택해주세요</label>
+                        <div id="eval-stars" class="flex justify-center gap-1 mb-2" data-selected="0">
+                            <span class="star" data-value="1">★</span>
+                            <span class="star" data-value="2">★</span>
+                            <span class="star" data-value="3">★</span>
+                            <span class="star" data-value="4">★</span>
+                            <span class="star" data-value="5">★</span>
+                        </div>
+                        <p class="text-center text-sm text-gray-500">별을 클릭해서 평점을 매겨주세요</p>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block mb-2 font-semibold text-gray-700">한줄평 (선택사항)</label>
+                        <textarea 
+                            id="eval-comment" 
+                            class="w-full border rounded-lg p-3" 
+                            rows="3" 
+                            maxlength="100" 
+                            placeholder="멘토와의 커피챗에 대한 소감을 남겨주세요"
+                        ></textarea>
+                        <p class="text-sm text-gray-500 mt-1">최대 100자까지 입력 가능합니다</p>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block mb-3 font-semibold text-gray-700">멘토가 친절했나요?</label>
+                        <div class="flex gap-6 justify-center">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="eval-kind" value="yes" class="w-4 h-4">
+                                <span class="text-gray-700">예</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="eval-kind" value="no" class="w-4 h-4">
+                                <span class="text-gray-700">아니오</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 justify-center">
+                        <button type="button" id="cancel-eval-btn" class="modal-cancel-btn">취소</button>
+                        <button type="submit" class="modal-confirm-btn">평가 제출</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 커피챗 평가 결과 모달 -->
+        <div id="coffeechat-eval-result-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="clipboard-list" class="w-8 h-8 text-orange-600"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-gray-800">평가 결과</h2>
+                </div>
+
+                <div id="eval-result-content">
+                    <!-- 평가 결과가 JS로 채워짐 -->
+                </div>
+
+                <div class="flex justify-center mt-6">
+                    <button id="close-eval-result-btn" class="modal-confirm-btn">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
