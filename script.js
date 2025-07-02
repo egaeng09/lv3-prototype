@@ -157,6 +157,70 @@ const comments = [
   },
 ]
 
+// 사용자 프로필 데이터 추가
+const userProfiles = {
+  주니어개발자: {
+    name: "주니어개발자",
+    title: "Frontend Developer",
+    experience: "1년차",
+    company: "스타트업",
+    specialties: ["React", "JavaScript"],
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    verified: false,
+  },
+  시니어개발자: {
+    name: "시니어개발자",
+    title: "Senior Full Stack Developer",
+    experience: "7년차",
+    company: "네이버",
+    specialties: ["React", "Node.js", "AWS"],
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    verified: true,
+  },
+  취준생: {
+    name: "취준생",
+    title: "예비 개발자",
+    experience: "신입",
+    company: "구직중",
+    specialties: ["HTML", "CSS", "JavaScript"],
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    verified: false,
+  },
+  개발팀장: {
+    name: "개발팀장",
+    title: "Development Team Lead",
+    experience: "10년차",
+    company: "카카오",
+    specialties: ["Architecture", "Management", "Backend"],
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    verified: true,
+  },
+  HR담당자: {
+    name: "HR담당자",
+    title: "HR Manager",
+    experience: "5년차",
+    company: "우아한형제들",
+    specialties: ["채용", "면접", "HR"],
+    avatar: "https://www.gravatar.com/avatar/?d=mp",
+    verified: true,
+  },
+}
+
+// getUserProfile 함수 추가
+function getUserProfile(authorName) {
+  return (
+    userProfiles[authorName] || {
+      name: authorName,
+      title: "사용자",
+      experience: "-",
+      company: "-",
+      specialties: [],
+      avatar: "https://www.gravatar.com/avatar/?d=mp",
+      verified: false,
+    }
+  )
+}
+
 // 메시지 데이터 (멘토별로 구분)
 const messagesByMentor = {}
 
@@ -165,7 +229,7 @@ let currentView = "main"
 let selectedMentor = null
 let messages = []
 let currentPostId = null
-let currentCategory = "all"
+const currentCategory = "all"
 
 // 전역 변수에 검색 관련 변수 추가
 let currentSearchQuery = ""
@@ -806,166 +870,108 @@ function renderCommunityFeed(posts) {
     return
   }
 
-  feed.innerHTML = posts.map((post) => createPostCard(post)).join("")
+  feed.innerHTML = posts
+    .map((post) => {
+      const userProfile = getUserProfile(post.author)
+
+      return `
+    <article class="post-card fade-in">
+        ${
+          post.likes >= 10
+            ? `
+        <div class="popular-header-aligned">
+            <div class="popular-badge">
+                <i data-lucide="flame" class="w-3 h-3"></i>
+                인기 게시글
+            </div>
+            <span class="text-sm text-orange-600 font-medium">${post.likes}개의 좋아요</span>
+        </div>
+        `
+            : ""
+        }
+        
+        <div class="flex items-start gap-4">
+            <div class="relative">
+                <img 
+                    src="${userProfile.avatar}" 
+                    alt="${userProfile.name}"
+                    class="w-12 h-12 rounded-full object-cover border-2 border-orange-100"
+                    style="width: 3rem; height: 3rem; object-fit: cover;"
+                />
+                ${userProfile.verified ? '<div class="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center"><i data-lucide="check" class="w-2 h-2 text-white"></i></div>' : ""}
+            </div>
+            <div class="flex-1">
+                <!-- 첫 번째 라인: 이름 + 인증 + 카테고리 + 작성시간 -->
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="font-semibold text-gray-800">${userProfile.name}</span>
+                        ${userProfile.verified ? '<i data-lucide="badge-check" class="w-4 h-4 text-blue-500"></i>' : ""}
+                        <span class="category-badge ${post.category === "question" ? "category-question" : post.category === "discussion" ? "category-discussion" : post.category === "sharing" ? "category-sharing" : "category-review"}">
+                            ${post.category === "question" ? "질문" : post.category === "discussion" ? "토론" : post.category === "sharing" ? "정보공유" : "코드리뷰"}
+                        </span>
+                    </div>
+                    <span class="text-sm text-gray-500">${formatTimeAgo(new Date(post.createdAt))}</span>
+                </div>
+                
+                <!-- 두 번째 라인: 직급 + 경력 + 회사 -->
+                <div class="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                    <span>${userProfile.title}</span>
+                    <span>•</span>
+                    <span>${userProfile.experience}</span>
+                    <span>•</span>
+                    <span>${userProfile.company}</span>
+                </div>
+                
+                <h2 class="text-xl font-bold text-gray-800 mb-3 hover:text-orange-600 transition-colors cursor-pointer" onclick="openPostDetail(${post.id})">
+                    ${post.title}
+                </h2>
+                
+                <p class="text-gray-600 leading-relaxed mb-4" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                    ${post.content}
+                </p>
+                
+                ${
+                  post.tags.length > 0
+                    ? `
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        ${post.tags.map((tag) => `<span class="specialty-tag">${tag}</span>`).join("")}
+                    </div>
+                `
+                    : ""
+                }
+                
+                <div class="flex items-center gap-6 text-gray-500">
+                    <button class="flex items-center gap-2 hover:text-orange-600 transition-colors" onclick="likePost(${post.id})">
+                        <i data-lucide="heart" class="w-4 h-4"></i>
+                        <span>${post.likes}</span>
+                    </button>
+                    <button class="flex items-center gap-2 hover:text-orange-600 transition-colors" onclick="openPostDetail(${post.id})">
+                        <i data-lucide="message-circle" class="w-4 h-4"></i>
+                        <span>댓글</span>
+                    </button>
+                    <button class="flex items-center gap-2 hover:text-orange-600 transition-colors">
+                        <i data-lucide="share" class="w-4 h-4"></i>
+                        <span>공유</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </article>
+`
+    })
+    .join("")
 
   setTimeout(() => {
     initializeLucideIcons()
   }, 0)
 }
 
-// 좋아요 상태 관리 (localStorage)
-function getLikedPosts() {
-  try {
-    return (JSON.parse(localStorage.getItem("likedPosts") || "[]") || []).map(Number)
-  } catch {
-    return []
-  }
-}
-
-function setLikedPosts(arr) {
-  localStorage.setItem("likedPosts", JSON.stringify(arr.map(Number)))
-}
-
-function getLikesMap() {
-  try {
-    return JSON.parse(localStorage.getItem("postLikesMap") || "{}")
-  } catch {
-    return {}
-  }
-}
-
-function setLikesMap(map) {
-  localStorage.setItem("postLikesMap", JSON.stringify(map))
-}
-
-// 게시글 카드 생성 (좋아요 상태/수 반영)
-function createPostCard(post) {
-  const categoryLabels = {
-    question: "질문",
-    discussion: "토론",
-    sharing: "정보공유",
-    review: "코드리뷰",
-  }
-
-  const categoryColors = {
-    question: "category-question",
-    discussion: "category-discussion",
-    sharing: "category-sharing",
-    review: "category-review",
-  }
-
-  const likedPosts = getLikedPosts()
-  const isLiked = likedPosts.includes(Number(post.id))
-  const likesMap = getLikesMap()
-  const likes = typeof likesMap[post.id] === "number" ? likesMap[post.id] : post.likes
-
-  // 인기 게시글 여부 확인 (10개 이상으로 변경)
-  const isPopular = likes >= 10
-
-  // 검색 하이라이트 적용
-  const highlightedTitle = highlightSearchTerm(post.title, currentSearchQuery)
-  const highlightedContent = highlightSearchTerm(post.content, currentSearchQuery)
-
-  return `
-        <article class="post-card fade-in ${isPopular ? "popular" : ""}">
-            ${
-              isPopular
-                ? `
-            <div class="flex items-center justify-between mb-3">
-                <div class="popular-badge">
-                    <i data-lucide="flame" class="w-3 h-3"></i>
-                    인기 게시글
-                </div>
-                <span class="text-sm text-orange-600 font-medium">${likes}개의 좋아요</span>
-            </div>
-            `
-                : ""
-            }
-            
-            <div class="flex items-start gap-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-semibold">
-                    <i data-lucide="user" class="w-6 h-6"></i>
-                </div>
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="font-semibold text-gray-800">${highlightSearchTerm(post.author, currentSearchQuery)}</span>
-                        <span class="text-sm text-gray-500">${formatTimeAgo(new Date(post.createdAt))}</span>
-                        <span class="category-badge ${categoryColors[post.category]}">
-                            ${categoryLabels[post.category]}
-                        </span>
-                    </div>
-                    
-                    <h2 class="text-xl font-bold text-gray-800 mb-3 hover:text-orange-600 transition-colors cursor-pointer" onclick="openPostDetail(${post.id})">
-                        ${highlightedTitle}
-                    </h2>
-                    
-                    <p class="text-gray-600 leading-relaxed mb-4" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                        ${highlightedContent}
-                    </p>
-                    
-                    ${
-                      post.tags.length > 0
-                        ? `
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            ${post.tags.map((tag) => `<span class="specialty-tag">${highlightSearchTerm(tag, currentSearchQuery)}</span>`).join("")}
-                        </div>
-                    `
-                        : ""
-                    }
-                    
-                    <div class="flex items-center gap-6 text-gray-500">
-                        <button class="flex items-center gap-2 hover:text-orange-600 transition-colors" onclick="likePost(${post.id})">
-                            <i data-lucide="heart" class="w-4 h-4 ${isLiked ? "text-orange-500" : ""}" ${isLiked ? 'fill="currentColor"' : ""}></i>
-                            <span>${likes}</span>
-                        </button>
-                        <button class="flex items-center gap-2 hover:text-orange-600 transition-colors" onclick="openPostDetail(${post.id})">
-                            <i data-lucide="message-circle" class="w-4 h-4"></i>
-                            <span>댓글</span>
-                        </button>
-                        <button class="flex items-center gap-2 hover:text-orange-600 transition-colors">
-                            <i data-lucide="share" class="w-4 h-4"></i>
-                            <span>공유</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </article>
-    `
-}
-
-// 게시글 좋아요 토글 (좋아요 수도 localStorage에 저장)
+// 게시글 좋아요 토글
 function likePost(postId) {
-  postId = Number(postId)
-  const post = posts.find((p) => Number(p.id) === postId)
-  let likedPosts = getLikedPosts()
-  const isLiked = likedPosts.includes(postId)
-
-  const likesMap = getLikesMap()
-  let likes = typeof likesMap[postId] === "number" ? likesMap[postId] : post ? post.likes : 0
-
+  const post = posts.find((p) => p.id === postId)
   if (post) {
-    if (isLiked) {
-      likes = Math.max(0, likes - 1)
-      likedPosts = likedPosts.filter((id) => id !== postId)
-    } else {
-      likes += 1
-      likedPosts.push(postId)
-    }
-
-    likesMap[postId] = likes
-    setLikedPosts(likedPosts)
-    setLikesMap(likesMap)
-
-    // 현재 보고 있는 뷰에 따라 적절히 갱신
-    if (isSearchActive) {
-      performSearch()
-    } else {
-      filterCommunityByCategory(currentCategory)
-    }
-
-    setTimeout(() => {
-      initializeLucideIcons()
-    }, 0)
+    post.likes += 1
+    loadCommunityPosts() // 커뮤니티 피드 다시 로드
   }
 }
 
@@ -988,20 +994,6 @@ function loadPostDetail(postId) {
 // 게시글 상세 렌더링
 function renderPostDetail(post, comments) {
   const content = document.getElementById("post-detail-content")
-  const categoryLabels = {
-    question: "질문",
-    discussion: "토론",
-    sharing: "정보공유",
-    review: "코드리뷰",
-  }
-
-  const categoryColors = {
-    question: "category-question",
-    discussion: "category-discussion",
-    sharing: "category-sharing",
-    review: "category-review",
-  }
-
   content.innerHTML = `
         <!-- 게시글 본문 -->
         <article class="post-card fade-in">
@@ -1013,8 +1005,8 @@ function renderPostDetail(post, comments) {
                     <div class="flex items-center gap-3 mb-3">
                         <span class="font-semibold text-gray-800">${post.author}</span>
                         <span class="text-sm text-gray-500">${formatTimeAgo(new Date(post.createdAt))}</span>
-                        <span class="category-badge ${categoryColors[post.category]}">
-                            ${categoryLabels[post.category]}
+                        <span class="category-badge ${post.category === "question" ? "category-question" : post.category === "discussion" ? "category-discussion" : post.category === "sharing" ? "category-sharing" : "category-review"}">
+                            ${post.category === "question" ? "질문" : post.category === "discussion" ? "토론" : post.category === "sharing" ? "정보공유" : "코드리뷰"}
                         </span>
                     </div>
                     
@@ -1408,138 +1400,43 @@ function setupCommunityCategoryTabs() {
       this.classList.add("active")
 
       const category = this.getAttribute("data-category")
-      currentCategory = category
       filterCommunityByCategory(category)
     })
   })
 }
 
-// 검색 처리 함수
-function handleSearch() {
-  const searchInput = document.getElementById("community-search")
-  const query = searchInput.value.trim().toLowerCase()
-  const clearBtn = document.getElementById("clear-search")
-
-  currentSearchQuery = query
-  isSearchActive = query.length > 0
-
-  // 클리어 버튼 표시/숨김
-  if (isSearchActive) {
-    clearBtn.classList.remove("hidden")
-  } else {
-    clearBtn.classList.add("hidden")
-  }
-
-  // 검색 실행
-  performSearch()
-}
-
-// 검색 실행 함수
-function performSearch() {
-  let filteredPosts = posts
-
-  if (isSearchActive) {
-    filteredPosts = posts.filter((post) => {
-      const titleMatch = post.title.toLowerCase().includes(currentSearchQuery)
-      const contentMatch = post.content.toLowerCase().includes(currentSearchQuery)
-      const tagMatch = post.tags.some((tag) => tag.toLowerCase().includes(currentSearchQuery))
-      const authorMatch = post.author.toLowerCase().includes(currentSearchQuery)
-
-      return titleMatch || contentMatch || tagMatch || authorMatch
-    })
-
-    // 검색 결과 정보 표시
-    showSearchResults(filteredPosts.length)
-  } else {
-    hideSearchResults()
-    // 현재 선택된 카테고리로 필터링
-    if (currentCategory !== "all") {
-      filteredPosts = filterByCategory(posts, currentCategory)
-    }
-  }
-
-  renderCommunityFeed(filteredPosts)
-}
-
-// 검색 결과 정보 표시
-function showSearchResults(count) {
-  const resultsInfo = document.getElementById("search-results-info")
-  const resultsText = document.getElementById("search-results-text")
-
-  resultsText.textContent = `"${currentSearchQuery}" 검색 결과: ${count}개의 게시글`
-  resultsInfo.classList.remove("hidden")
-}
-
-// 검색 결과 숨김
-function hideSearchResults() {
-  const resultsInfo = document.getElementById("search-results-info")
-  resultsInfo.classList.add("hidden")
-}
-
-// 검색 초기화
-function clearSearch() {
-  const searchInput = document.getElementById("community-search")
-  const clearBtn = document.getElementById("clear-search")
-
-  searchInput.value = ""
-  currentSearchQuery = ""
-  isSearchActive = false
-  clearBtn.classList.add("hidden")
-
-  hideSearchResults()
-
-  // 현재 카테고리로 다시 필터링
-  filterCommunityByCategory(currentCategory)
-}
-
-// 카테고리별 필터링 함수 수정
+// 카테고리별 필터링 함수
 function filterCommunityByCategory(category) {
-  currentCategory = category
   let filtered = posts
 
-  // 검색이 활성화된 경우 검색 우선
-  if (isSearchActive) {
-    performSearch()
-    return
-  }
-
-  if (category === "popular") {
-    // 인기 게시글 필터링 (좋아요 5개 이상)
-    filtered = getPopularPosts()
-  } else if (category && category !== "all") {
-    filtered = filterByCategory(posts, category)
+  if (category && category !== "all") {
+    filtered = posts.filter((post) => post.category === category)
   }
 
   renderCommunityFeed(filtered)
 }
 
-// 카테고리별 필터링 헬퍼 함수
-function filterByCategory(posts, category) {
-  return posts.filter((post) => post.category === category)
+// 검색 관련 함수 추가
+function handleSearch() {
+  currentSearchQuery = document.getElementById("community-search").value.trim()
+  isSearchActive = currentSearchQuery !== ""
+
+  if (isSearchActive) {
+    const filteredPosts = posts.filter(
+      (post) =>
+        post.title.toLowerCase().includes(currentSearchQuery.toLowerCase()) ||
+        post.content.toLowerCase().includes(currentSearchQuery.toLowerCase()) ||
+        post.tags.some((tag) => tag.toLowerCase().includes(currentSearchQuery.toLowerCase())),
+    )
+    renderCommunityFeed(filteredPosts)
+  } else {
+    loadCommunityPosts()
+  }
 }
 
-// 인기 게시글 가져오기 함수
-function getPopularPosts() {
-  const likesMap = getLikesMap()
-
-  // 좋아요 수가 10개 이상인 게시글을 인기 게시글로 분류
-  const popularPosts = posts.filter((post) => {
-    const likes = typeof likesMap[post.id] === "number" ? likesMap[post.id] : post.likes
-    return likes >= 10
-  })
-
-  // 좋아요 수 기준으로 내림차순 정렬
-  return popularPosts.sort((a, b) => {
-    const likesA = typeof likesMap[a.id] === "number" ? likesMap[a.id] : a.likes
-    const likesB = typeof likesMap[b.id] === "number" ? likesMap[b.id] : b.likes
-    return likesB - likesA
-  })
-}
-
-// 검색어 하이라이트 함수
-function highlightSearchTerm(text, searchTerm) {
-  if (!searchTerm || !isSearchActive) return text
-
-  const regex = new RegExp(`(${searchTerm})`, "gi")
-  return text.replace(regex, '<span class="search-highlight">$1</span>')
+function clearSearch() {
+  document.getElementById("community-search").value = ""
+  currentSearchQuery = ""
+  isSearchActive = false
+  loadCommunityPosts()
 }
