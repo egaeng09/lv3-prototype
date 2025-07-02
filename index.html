@@ -181,17 +181,37 @@
                                 <p class="text-sm text-gray-600">질문을 남기고 답변을 받아보세요</p>
                             </div>
                         </div>
-                        <button id="go-to-post-create" class="gradient-button text-white shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 px-4 py-2 rounded-lg">
-                            <i data-lucide="edit-3" class="w-4 h-4 mr-2"></i>
-                            게시글 작성
-                        </button>
+                        <!-- 검색창 HTML 구조 개선 -->
+                        <div class="flex items-center gap-3">
+                            <!-- 검색창을 컨테이너로 감싸기 -->
+                            <div class="search-container">
+                                <input
+                                    type="text"
+                                    id="community-search"
+                                    placeholder="게시글 검색..."
+                                    class="outline-none"
+                                />
+                                <i data-lucide="search" class="search-icon w-4 h-4"></i>
+                                <button id="clear-search" class="clear-icon hidden">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <button id="go-to-post-create" class="gradient-button text-white shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 px-4 py-2 rounded-lg">
+                                <i data-lucide="edit-3" class="w-4 h-4 mr-2"></i>
+                                게시글 작성
+                            </button>
+                        </div>
                     </div>
                 </div>
             </header>
 
-            <!-- 카테고리 탭 메뉴 -->
+            <!-- 카테고리 탭 메뉴 - 인기 탭 추가 -->
             <nav id="community-category-tabs" class="flex gap-2 justify-center py-4 bg-white border-b border-orange-100 sticky top-[64px] z-40">
                 <button class="category-tab-btn px-4 py-2 rounded-lg font-medium text-gray-600 bg-orange-50 hover:bg-orange-100 active" data-category="all">전체</button>
+                <button class="category-tab-btn px-4 py-2 rounded-lg font-medium text-gray-600 bg-orange-50 hover:bg-orange-100" data-category="popular">
+                    <i data-lucide="trending-up" class="w-4 h-4 mr-1"></i>
+                    인기
+                </button>
                 <button class="category-tab-btn px-4 py-2 rounded-lg font-medium text-gray-600 bg-orange-50 hover:bg-orange-100" data-category="question">질문</button>
                 <button class="category-tab-btn px-4 py-2 rounded-lg font-medium text-gray-600 bg-orange-50 hover:bg-orange-100" data-category="discussion">토론</button>
                 <button class="category-tab-btn px-4 py-2 rounded-lg font-medium text-gray-600 bg-orange-50 hover:bg-orange-100" data-category="sharing">정보공유</button>
@@ -199,6 +219,16 @@
             </nav>
 
             <div class="max-w-4xl mx-auto px-4 py-8">
+                <!-- 검색 결과 표시 영역 추가 -->
+                <div id="search-results-info" class="mb-4 hidden">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="search" class="w-4 h-4 text-blue-600"></i>
+                            <span id="search-results-text" class="text-blue-800 font-medium"></span>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="community-feed" class="space-y-6">
                     <!-- 게시글들이 여기에 동적으로 추가됩니다 -->
                 </div>
