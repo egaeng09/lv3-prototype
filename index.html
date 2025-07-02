@@ -9,6 +9,40 @@
 </head>
 <body>
     <div id="app">
+        <!-- Login Modal -->
+        <div id="login-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="log-in" class="w-8 h-8 text-orange-600"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-gray-800">로그인</h2>
+                    <p class="text-gray-600 text-sm mt-2">소셜 계정으로 간편하게 로그인하세요</p>
+                </div>
+
+                <div class="space-y-3 mb-6">
+                    <button id="google-login"
+                        class="social-login-btn w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-3">
+                        <i data-lucide="mail" class="w-5 h-5 text-red-500"></i>
+                        Google로 로그인
+                    </button>
+                    <button id="github-login"
+                        class="social-login-btn w-full bg-gray-900 text-white hover:bg-gray-800 py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-3">
+                        <i data-lucide="github" class="w-5 h-5"></i>
+                        GitHub로 로그인
+                    </button>
+                    <button id="kakao-login"
+                        class="social-login-btn w-full bg-yellow-400 text-gray-900 hover:bg-yellow-500 py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-3">
+                        <i data-lucide="message-circle" class="w-5 h-5"></i>
+                        카카오로 로그인
+                    </button>
+                </div>
+
+                <div class="flex justify-center">
+                    <button id="close-login-modal" class="modal-cancel-btn">취소</button>
+                </div>
+            </div>
+        </div>
         <!-- Main View -->
         <div id="main-view" class="view active">
             <!-- Header -->
@@ -26,8 +60,30 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-sm font-medium">
-                            Beta v1.0
+                        <div class="flex items-center gap-3">
+                            <!-- 로그인 전 -->
+                            <div id="auth-logged-out" class="flex items-center gap-3">
+                                <button id="login-btn" class="gradient-button text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+                                    <i data-lucide="log-in" class="w-4 h-4 mr-2"></i>
+                                    로그인
+                                </button>
+                                <div class="bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-sm font-medium">
+                                    Beta v1.0
+                                </div>
+                            </div>
+                            <!-- 로그인 후 -->
+                            <div id="auth-logged-in" class="flex items-center gap-3" style="display: none;">
+                                <div class="flex items-center gap-2">
+                                    <img id="user-avatar" src="" alt="User Avatar" class="w-8 h-8 rounded-full">
+                                    <span id="user-name" class="text-sm font-medium text-gray-700"></span>
+                                </div>
+                                <button id="logout-btn" class="text-gray-600 hover:bg-orange-100 rounded-lg p-2">
+                                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                                </button>
+                                <div class="bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-sm font-medium">
+                                    Beta v1.0
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -104,6 +160,31 @@
                                 <p class="text-sm text-gray-600">함께할 시니어 개발자를 선택해보세요</p>
                             </div>
                         </div>
+                        <div class="flex items-center gap-3">
+                            <!-- 로그인 전 -->
+                            <div id="auth-logged-out-mentor" class="flex items-center gap-3">
+                                <button id="login-btn-mentor" class="gradient-button text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+                                    <i data-lucide="log-in" class="w-4 h-4 mr-2"></i>
+                                    로그인
+                                </button>
+                                <div class="bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-sm font-medium">
+                                    Beta v1.0
+                                </div>
+                            </div>
+                            <!-- 로그인 후 -->
+                            <div id="auth-logged-in-mentor" class="flex items-center gap-3" style="display: none;">
+                                <div class="flex items-center gap-2">
+                                    <img id="user-avatar-mentor" src="" alt="User Avatar" class="w-8 h-8 rounded-full">
+                                    <span id="user-name-mentor" class="text-sm font-medium text-gray-700"></span>
+                                </div>
+                                <button id="logout-btn-mentor" class="text-gray-600 hover:bg-orange-100 rounded-lg p-2">
+                                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                                </button>
+                                <div class="bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-sm font-medium">
+                                    Beta v1.0
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -171,35 +252,53 @@
         <div id="community-view" class="view">
             <header class="glass-header border-b sticky top-0 z-50">
                 <div class="max-w-6xl mx-auto px-4">
-                    <div class="flex items-center justify-between py-4 min-h-16">
-                        <div class="flex items-center gap-4">
-                            <button id="back-to-main-from-community" class="text-gray-600 hover:bg-orange-100 rounded-lg p-2">
+                    <div class="flex items-center py-4 min-h-16 gap-4 items-center relative">
+                        <!-- 좌측: 로고/타이틀 -->
+                        <div class="flex items-center gap-4 flex-1 min-w-0">
+                            <button id="back-to-main-from-community" class="text-gray-600 hover:bg-orange-100 rounded-lg p-2 flex-shrink-0">
                                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
                             </button>
-                            <div>
-                                <h1 class="text-xl font-bold text-gray-800">커뮤니티</h1>
-                                <p class="text-sm text-gray-600">질문을 남기고 답변을 받아보세요</p>
+                            <div class="truncate">
+                                <h1 class="text-xl font-bold text-gray-800 truncate">커뮤니티</h1>
+                                <p class="text-sm text-gray-600 truncate">질문을 남기고 답변을 받아보세요</p>
                             </div>
                         </div>
-                        <!-- 검색창 HTML 구조 개선 -->
-                        <div class="flex items-center gap-3">
-                            <!-- 검색창을 컨테이너로 감싸기 -->
-                            <div class="search-container">
-                                <input
-                                    type="text"
-                                    id="community-search"
-                                    placeholder="게시글 검색..."
-                                    class="outline-none"
-                                />
+                        <!-- 중앙: 검색창 (absolute 중앙 배치) -->
+                        <div style="position:absolute; left:50%; top:50%; transform:translate(-30%,-50%); z-index:10; width:100%; max-width:22rem;">
+                            <div class="search-container w-full flex items-center">
+                                <input type="text" id="community-search" placeholder="게시글 검색..." class="outline-none w-full" />
                                 <i data-lucide="search" class="search-icon w-4 h-4"></i>
                                 <button id="clear-search" class="clear-icon hidden">
                                     <i data-lucide="x" class="w-4 h-4"></i>
                                 </button>
                             </div>
-                            <button id="go-to-post-create" class="gradient-button text-white shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 px-4 py-2 rounded-lg">
-                                <i data-lucide="edit-3" class="w-4 h-4 mr-2"></i>
-                                게시글 작성
-                            </button>
+                        </div>
+                        <!-- 우측: 로그인/회원정보/게시글작성 -->
+                        <div class="flex items-center gap-3 flex-1 justify-end min-w-0">
+                            <!-- 로그인 전 -->
+                            <div id="auth-logged-out-community" class="flex items-center gap-3">
+                                <button id="login-btn-community" class="gradient-button text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+                                    <i data-lucide="log-in" class="w-4 h-4 mr-2"></i>
+                                    로그인
+                                </button>
+                                <div class="bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-sm font-medium">
+                                    Beta v1.0
+                                </div>
+                            </div>
+                            <!-- 로그인 후 -->
+                            <div id="auth-logged-in-community" class="flex items-center gap-3" style="display: none;">
+                                <div class="flex items-center gap-2">
+                                    <img id="user-avatar-community" src="" alt="User Avatar" class="w-8 h-8 rounded-full">
+                                    <span id="user-name-community" class="text-sm font-medium text-gray-700"></span>
+                                </div>
+                                <button id="logout-btn-community" class="text-gray-600 hover:bg-orange-100 rounded-lg p-2">
+                                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                                </button>
+                                <button id="go-to-post-create" class="gradient-button text-white shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 px-4 py-2 rounded-lg ml-2">
+                                    <i data-lucide="edit-3" class="w-4 h-4 mr-2"></i>
+                                    게시글 작성
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -279,12 +378,86 @@
 
                         <div>
                             <label class="text-sm font-semibold text-gray-700 block mb-2">내용</label>
-                            <textarea 
-                                id="post-content" 
-                                placeholder="구체적인 상황이나 궁금한 점을 자세히 설명해주세요. 코드가 있다면 함께 공유해주세요."
-                                class="w-full min-h-[300px] resize-none px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
-                                required
-                            ></textarea>
+                            <!-- 에디터 툴바 -->
+                            <div id="editor-toolbar"
+                                class="border border-gray-300 border-b-0 rounded-t-lg bg-gray-50 p-3 flex flex-wrap gap-2">
+                                <button type="button" class="editor-btn" data-command="bold" title="굵게">
+                                    <i data-lucide="bold" class="w-4 h-4"></i>
+                                </button>
+                                <button type="button" class="editor-btn" data-command="italic" title="기울임">
+                                    <i data-lucide="italic" class="w-4 h-4"></i>
+                                </button>
+                                <button type="button" class="editor-btn" data-command="underline" title="밑줄">
+                                    <i data-lucide="underline" class="w-4 h-4"></i>
+                                </button>
+
+                                <div class="border-l border-gray-300 mx-2"></div>
+
+                                <button type="button" class="editor-btn" data-command="formatBlock" data-value="h2"
+                                    title="제목 (큰)">
+                                    <i data-lucide="heading-1" class="w-4 h-4"></i>
+                                </button>
+                                <button type="button" class="editor-btn" data-command="formatBlock" data-value="h3"
+                                    title="제목 (작은)">
+                                    <i data-lucide="heading-2" class="w-4 h-4"></i>
+                                </button>
+
+                                <div class="border-l border-gray-300 mx-2"></div>
+
+                                <button type="button" class="editor-btn" data-command="insertUnorderedList" title="목록">
+                                    <i data-lucide="list" class="w-4 h-4"></i>
+                                </button>
+                                <button type="button" class="editor-btn" data-command="insertOrderedList" title="번호 목록">
+                                    <i data-lucide="list-ordered" class="w-4 h-4"></i>
+                                </button>
+
+                                <div class="border-l border-gray-300 mx-2"></div>
+
+                                <button type="button" class="editor-btn" id="insert-link-btn" title="링크">
+                                    <i data-lucide="link" class="w-4 h-4"></i>
+                                </button>
+                                <button type="button" class="editor-btn" id="insert-code-btn" title="코드">
+                                    <i data-lucide="code" class="w-4 h-4"></i>
+                                </button>
+                                <button type="button" class="editor-btn" data-command="formatBlock"
+                                    data-value="blockquote" title="인용문">
+                                    <i data-lucide="quote" class="w-4 h-4"></i>
+                                </button>
+
+                                <div class="border-l border-gray-300 mx-2"></div>
+
+                                <button type="button" class="editor-btn" data-command="justifyLeft" title="왼쪽 정렬">
+                                    <i data-lucide="align-left" class="w-4 h-4"></i>
+                                </button>
+                                <button type="button" class="editor-btn" data-command="justifyCenter" title="가운데 정렬">
+                                    <i data-lucide="align-center" class="w-4 h-4"></i>
+                                </button>
+                                <button type="button" class="editor-btn" data-command="justifyRight" title="오른쪽 정렬">
+                                    <i data-lucide="align-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+
+                            <!-- 에디터 영역 -->
+                            <div id="post-content-editor" contenteditable="true"
+                                class="w-full min-h-[300px] border border-gray-300 rounded-b-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none bg-white"
+                                placeholder="구체적인 상황이나 궁금한 점을 자세히 설명해주세요. 에디터를 활용해서 더 생동감 있게 작성해보세요!"></div>
+
+                            <!-- 미리보기 토글 -->
+                            <div class="mt-2 flex justify-between items-center">
+                                <button type="button" id="preview-toggle"
+                                    class="text-sm text-orange-600 hover:text-orange-700">
+                                    <i data-lucide="eye" class="w-4 h-4 mr-1"></i>
+                                    미리보기
+                                </button>
+                                <span class="text-sm text-gray-500">Ctrl+B: 굵게, Ctrl+I: 기울임, Ctrl+U: 밑줄</span>
+                            </div>
+
+                            <!-- 미리보기 영역 -->
+                            <div id="content-preview"
+                                class="hidden mt-3 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-2">미리보기</h4>
+                                <div id="preview-content" class="prose prose-sm max-w-none"></div>
+                            </div>
                         </div>
 
                         <div>
@@ -356,6 +529,32 @@
                             </button>
                             <div>
                                 <h1 class="text-xl font-bold text-gray-800">게시글</h1>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <!-- 로그인 전 -->
+                            <div id="auth-logged-out-postdetail" class="flex items-center gap-3">
+                                <button id="login-btn-postdetail" class="gradient-button text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+                                    <i data-lucide="log-in" class="w-4 h-4 mr-2"></i>
+                                    로그인
+                                </button>
+                                <div class="bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-sm font-medium">
+                                    Beta v1.0
+                                </div>
+                            </div>
+                            <!-- 로그인 후 -->
+                            <div id="auth-logged-in-postdetail" class="flex items-center gap-3" style="display: none;">
+                                <div class="flex items-center gap-2">
+                                    <img id="user-avatar-postdetail" src="" alt="User Avatar" class="w-8 h-8 rounded-full">
+                                    <span id="user-name-postdetail" class="text-sm font-medium text-gray-700"></span>
+                                </div>
+                                <button id="logout-btn-postdetail" class="text-gray-600 hover:bg-orange-100 rounded-lg p-2">
+                                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                                </button>
+                                <button id="go-to-post-create-detail" class="gradient-button text-white shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 px-4 py-2 rounded-lg ml-2">
+                                    <i data-lucide="edit-3" class="w-4 h-4 mr-2"></i>
+                                    게시글 작성
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -515,8 +714,27 @@
                 </div>
             </div>
         </div>
+<!-- 미리보기 모달 -->
+<div id="preview-modal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="eye" class="w-8 h-8 text-orange-600"></i>
+            </div>
+            <h2 class="text-lg font-bold text-gray-800">미리보기</h2>
+            <p class="text-gray-600 text-sm mt-2">작성 중인 게시글이 실제로 어떻게 보일지 확인하세요.</p>
+        </div>
+        <div id="preview-modal-content" class="prose prose-sm max-w-none mb-6"
+            style="background:#f9fafb; border-radius:0.5rem; padding:1.5rem;"></div>
+        <div class="flex justify-center mt-6">
+            <button id="close-preview-modal" class="modal-confirm-btn">닫기</button>
+        </div>
+    </div>
+</div>
     </div>
 
     <script src="script.js"></script>
+    <!-- 토스트 알림 컨테이너 -->
+    <div id="toast-container" style="position:fixed;bottom:2.5rem;left:50%;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;align-items:center;gap:0.5rem;"></div>
 </body>
 </html>

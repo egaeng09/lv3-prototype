@@ -207,7 +207,20 @@ const userProfiles = {
 }
 
 // getUserProfile 함수 추가
-function getUserProfile(authorName) {
+function getUserProfile(authorName, post = null) {
+  // post에 authorTitle 등 있으면 우선 사용
+  if (post && (post.authorTitle || post.authorExperience || post.authorCompany || post.authorAvatar)) {
+    return {
+      name: authorName,
+      title: post.authorTitle || "사용자",
+      experience: post.authorExperience || "-",
+      company: post.authorCompany || "-",
+      specialties: [],
+      avatar: post.authorAvatar || "https://www.gravatar.com/avatar/?d=mp",
+      verified: false,
+    }
+  }
+  // 기존 userProfiles/mocks/기본값
   return (
     userProfiles[authorName] || {
       name: authorName,
@@ -262,6 +275,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 첫 번째 뷰 표시
   showView("main")
+
+  // 인증 UI 초기화
+  updateAuthUI();
+
+  // 로그인/인증 관련 이벤트 리스너 연결
+  document.getElementById('login-btn').addEventListener('click', showLoginModal);
+  document.getElementById('close-login-modal').addEventListener('click', hideLoginModal);
+  document.getElementById('logout-btn').addEventListener('click', handleLogout);
+  document.getElementById('google-login').addEventListener('click', () => handleSocialLogin('google'));
+  document.getElementById('github-login').addEventListener('click', () => handleSocialLogin('github'));
+  document.getElementById('kakao-login').addEventListener('click', () => handleSocialLogin('kakao'));
 })
 
 // 이벤트 리스너 설정
@@ -278,7 +302,13 @@ function setupEventListeners() {
   document.getElementById("back-to-community-from-detail").addEventListener("click", () => showView("community"))
 
   // 커뮤니티 관련
-  document.getElementById("go-to-post-create").addEventListener("click", () => showView("postCreate"))
+  document.getElementById("go-to-post-create").addEventListener("click", () => {
+    if (!isLoggedIn) {
+      showLoginModal();
+      return;
+    }
+    showView("postCreate");
+  });
   document.getElementById("cancel-post").addEventListener("click", () => showView("community"))
 
   // 게시글 작성 폼
@@ -321,6 +351,18 @@ function setupEventListeners() {
 
   if (clearSearchBtn) {
     clearSearchBtn.addEventListener("click", clearSearch)
+  }
+
+  // 게시글 상세 - 게시글 작성 버튼 이벤트 연결
+  const goToPostCreateDetail = document.getElementById('go-to-post-create-detail');
+  if (goToPostCreateDetail) {
+      goToPostCreateDetail.onclick = () => {
+          if (!isLoggedIn) {
+              showLoginModal();
+              return;
+          }
+          showView('postCreate');
+      };
   }
 }
 
@@ -519,6 +561,12 @@ function showView(viewName) {
   } else if (viewName === "community") {
     loadCommunityPosts()
     setupCommunityCategoryTabs()
+  } else if (viewName === "postCreate") {
+    // 에디터 초기화
+    setTimeout(() => {
+      initializeEditor()
+      initializeLucideIcons()
+    }, 100)
   } else if (viewName === "postDetail" && currentPostId) {
     loadPostDetail(currentPostId)
   }
@@ -625,6 +673,10 @@ function updateOnlineCount(mentors) {
 
 // 채팅 시작
 function startChat(mentorId) {
+  if (!isLoggedIn) {
+    showLoginModal();
+    return;
+  }
   selectedMentor = mentors.find((mentor) => mentor.id === mentorId)
   if (selectedMentor) {
     // 해당 멘토의 메시지 로드 또는 초기화
@@ -870,21 +922,28 @@ function renderCommunityFeed(posts) {
     return
   }
 
+  // 좋아요 상태/수 관련 변수는 map 바깥에서 선언
+  const likedPosts = getLikedPosts()
+  const likesMap = getLikesMap()
+
   feed.innerHTML = posts
     .map((post) => {
-      const userProfile = getUserProfile(post.author)
+      const userProfile = getUserProfile(post.author, post)
+      const isLiked = likedPosts.includes(Number(post.id))
+      const likes = typeof likesMap[post.id] === "number" ? likesMap[post.id] : post.likes
 
+      const hasTags = post.tags && post.tags.length > 0
       return `
-    <article class="post-card fade-in">
+    <article class="post-card fade-in${!hasTags ? ' no-tags' : ''}">
         ${
-          post.likes >= 10
+          likes >= 10
             ? `
         <div class="popular-header-aligned">
             <div class="popular-badge">
                 <i data-lucide="flame" class="w-3 h-3"></i>
                 인기 게시글
             </div>
-            <span class="text-sm text-orange-600 font-medium">${post.likes}개의 좋아요</span>
+            <span class="text-sm text-orange-600 font-medium">${likes}개의 좋아요</span>
         </div>
         `
             : ""
@@ -941,9 +1000,9 @@ function renderCommunityFeed(posts) {
                 }
                 
                 <div class="flex items-center gap-6 text-gray-500">
-                    <button class="flex items-center gap-2 hover:text-orange-600 transition-colors" onclick="likePost(${post.id})">
-                        <i data-lucide="heart" class="w-4 h-4"></i>
-                        <span>${post.likes}</span>
+                    <button id="post-detail-like-btn" class="flex items-center gap-2 hover:text-orange-600 transition-colors" data-like-btn onclick="likePost(${post.id})">
+                        <i data-lucide="heart" class="w-4 h-4 ${isLiked ? "text-orange-500" : ""}" ${isLiked ? 'fill="currentColor"' : ""}></i>
+                        <span>${likes}</span>
                     </button>
                     <button class="flex items-center gap-2 hover:text-orange-600 transition-colors" onclick="openPostDetail(${post.id})">
                         <i data-lucide="message-circle" class="w-4 h-4"></i>
@@ -966,12 +1025,61 @@ function renderCommunityFeed(posts) {
   }, 0)
 }
 
-// 게시글 좋아요 토글
+// 좋아요 상태 관리 (localStorage)
+function getLikedPosts() {
+  if (!isLoggedIn) return [];
+  try {
+    return (JSON.parse(localStorage.getItem("likedPosts") || "[]") || []).map(Number)
+  } catch {
+    return []
+  }
+}
+function setLikedPosts(arr) {
+  localStorage.setItem("likedPosts", JSON.stringify(arr.map(Number)))
+}
+function getLikesMap() {
+  try {
+    return JSON.parse(localStorage.getItem("postLikesMap") || "{}")
+  } catch {
+    return {}
+  }
+}
+function setLikesMap(map) {
+  localStorage.setItem("postLikesMap", JSON.stringify(map))
+}
+
+// 게시글 좋아요 토글 (하트 색상, localStorage)
 function likePost(postId) {
-  const post = posts.find((p) => p.id === postId)
+  if (!isLoggedIn) {
+    showLoginModal();
+    return;
+  }
+  postId = Number(postId)
+  const post = posts.find((p) => Number(p.id) === postId)
+  let likedPosts = getLikedPosts()
+  const isLiked = likedPosts.includes(postId)
+  const likesMap = getLikesMap()
+  let likes = typeof likesMap[postId] === "number" ? likesMap[postId] : post ? post.likes : 0
+
   if (post) {
-    post.likes += 1
-    loadCommunityPosts() // 커뮤니티 피드 다시 로드
+    if (isLiked) {
+      likes = Math.max(0, likes - 1)
+      likedPosts = likedPosts.filter((id) => id !== postId)
+    } else {
+      likes += 1
+      likedPosts.push(postId)
+    }
+    likesMap[postId] = likes
+    setLikedPosts(likedPosts)
+    setLikesMap(likesMap)
+    // 전체가 아닌 현재 탭 기준으로 목록 갱신
+    filterCommunityByCategory(currentCategory)
+    // 상세 화면이면 상세도 새로고침
+    if (document.getElementById('post-detail-view') && document.getElementById('post-detail-view').classList.contains('active')) {
+      if (typeof currentPostId !== 'undefined' && currentPostId) {
+        loadPostDetail(currentPostId);
+      }
+    }
   }
 }
 
@@ -994,27 +1102,52 @@ function loadPostDetail(postId) {
 // 게시글 상세 렌더링
 function renderPostDetail(post, comments) {
   const content = document.getElementById("post-detail-content")
+  const userProfile = getUserProfile(post.author, post)
+
+  // 좋아요 상태/수 계산
+  const likedPosts = getLikedPosts()
+  const likesMap = getLikesMap()
+  const isLiked = likedPosts.includes(Number(post.id))
+  const likes = typeof likesMap[post.id] === "number" ? likesMap[post.id] : post.likes
+
   content.innerHTML = `
         <!-- 게시글 본문 -->
         <article class="post-card fade-in">
             <div class="flex items-start gap-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-semibold">
-                    <i data-lucide="user" class="w-6 h-6"></i>
+                <div class="relative">
+                    <img 
+                        src="${userProfile.avatar}" 
+                        alt="${userProfile.name}"
+                        class="w-12 h-12 rounded-full object-cover border-2 border-orange-100"
+                        style="width: 3rem; height: 3rem; object-fit: cover;"
+                    />
+                    ${userProfile.verified ? '<div class="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center"><i data-lucide="check" class="w-2 h-2 text-white"></i></div>' : ""}
                 </div>
                 <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="font-semibold text-gray-800">${post.author}</span>
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="font-semibold text-gray-800">${userProfile.name}</span>
+                            ${userProfile.verified ? '<i data-lucide="badge-check" class="w-4 h-4 text-blue-500"></i>' : ""}
+                            <span class="category-badge ${post.category === "question" ? "category-question" : post.category === "discussion" ? "category-discussion" : post.category === "sharing" ? "category-sharing" : "category-review"}">
+                                ${post.category === "question" ? "질문" : post.category === "discussion" ? "토론" : post.category === "sharing" ? "정보공유" : "코드리뷰"}
+                            </span>
+                        </div>
                         <span class="text-sm text-gray-500">${formatTimeAgo(new Date(post.createdAt))}</span>
-                        <span class="category-badge ${post.category === "question" ? "category-question" : post.category === "discussion" ? "category-discussion" : post.category === "sharing" ? "category-sharing" : "category-review"}">
-                            ${post.category === "question" ? "질문" : post.category === "discussion" ? "토론" : post.category === "sharing" ? "정보공유" : "코드리뷰"}
-                        </span>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                        <span>${userProfile.title}</span>
+                        <span>•</span>
+                        <span>${userProfile.experience}</span>
+                        <span>•</span>
+                        <span>${userProfile.company}</span>
                     </div>
                     
                     <h1 class="text-2xl font-bold text-gray-800 mb-4">${post.title}</h1>
                     
-                    <p class="text-gray-600 leading-relaxed mb-4 whitespace-pre-wrap">
+                    <div class="prose prose-sm max-w-none text-gray-600 leading-relaxed mb-4">
                         ${post.content}
-                    </p>
+                    </div>
                     
                     ${
                       post.tags.length > 0
@@ -1027,9 +1160,9 @@ function renderPostDetail(post, comments) {
                     }
                     
                     <div class="flex items-center gap-6 text-gray-500">
-                        <button class="flex items-center gap-2 hover:text-orange-600 transition-colors" onclick="likePost(${post.id})">
-                            <i data-lucide="heart" class="w-4 h-4"></i>
-                            <span>${post.likes}</span>
+                        <button class="flex items-center gap-2 hover:text-orange-600 transition-colors" data-like-btn onclick="likePost(${post.id})">
+                            <i data-lucide="heart" class="w-4 h-4 ${isLiked ? "text-orange-500" : ""}" ${isLiked ? 'fill="currentColor"' : ""}></i>
+                            <span>${likes}</span>
                         </button>
                         <button class="flex items-center gap-2 hover:text-orange-600 transition-colors">
                             <i data-lucide="share" class="w-4 h-4"></i>
@@ -1056,34 +1189,51 @@ function renderPostDetail(post, comments) {
                     </p>
                 `
                     : comments
-                        .map(
-                          (comment) => `
+                        .map((comment) => {
+                          // 댓글 객체에 avatar 등 정보가 있으면 우선 사용
+                          const commentProfile = {
+                            name: comment.author,
+                            avatar: comment.avatar || "https://www.gravatar.com/avatar/?d=mp",
+                            title: comment.title || "사용자",
+                            experience: comment.experience || "-",
+                            company: comment.company || "-",
+                            verified: comment.verified || false,
+                          };
+                          return `
                     <div class="flex items-start gap-3">
-                        <div class="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                            <i data-lucide="user" class="w-4 h-4"></i>
+                        <div class="relative">
+                            <img 
+                                src="${commentProfile.avatar}" 
+                                alt="${commentProfile.name}"
+                                class="w-8 h-8 rounded-full object-cover border border-orange-100"
+                                style="width: 2rem; height: 2rem; object-fit: cover;"
+                            />
+                            ${commentProfile.verified ? '<div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center"><i data-lucide="check" class="w-1.5 h-1.5 text-white"></i></div>' : ""}
                         </div>
                         <div class="flex-1">
                             <div class="flex items-center gap-2 mb-1">
-                                <span class="font-semibold text-gray-800">${comment.author}</span>
+                                <span class="font-semibold text-gray-800">${commentProfile.name}</span>
+                                ${commentProfile.verified ? '<i data-lucide="badge-check" class="w-3 h-3 text-blue-500"></i>' : ""}
                                 <span class="text-xs text-gray-500">
                                     ${formatTimeAgo(new Date(comment.createdAt))}
                                 </span>
                             </div>
-                            <p class="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
+                            <div class="prose prose-sm max-w-none text-gray-600 text-sm leading-relaxed">
                                 ${comment.content}
-                            </p>
+                            </div>
                         </div>
                     </div>
-                `,
-                        )
+                `
+                        })
                         .join("")
                 }
             </div>
             
-            <!-- 댓글 입력 -->
+            <!-- 댓글 입력: 로그인한 경우에만 표시 -->
+            ${isLoggedIn && currentUser ? `
             <div class="flex items-start gap-3">
-                <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-600">
-                    <i data-lucide="user" class="w-4 h-4"></i>
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-gray-600 overflow-hidden border border-orange-100">
+                  <img src="${currentUser.avatar}" alt="내 프로필" class="w-8 h-8 object-cover comment-profile-img" style="border-radius:50%;" />
                 </div>
                 <div class="flex-1">
                     <textarea
@@ -1102,6 +1252,7 @@ function renderPostDetail(post, comments) {
                     </div>
                 </div>
             </div>
+            ` : ''}
         </div>
     `
 
@@ -1109,10 +1260,23 @@ function renderPostDetail(post, comments) {
   setTimeout(() => {
     initializeLucideIcons()
   }, 100)
+
+  // 여러 개의 좋아요 버튼(목록/상세) 모두에 이벤트 위임
+  const likeBtns = content.querySelectorAll('[data-like-btn]');
+  likeBtns.forEach(btn => {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      likePost(post.id);
+    };
+  });
 }
 
 // 댓글 작성
 function submitComment(postId) {
+  if (!isLoggedIn || !currentUser) {
+    showLoginModal();
+    return;
+  }
   const input = document.getElementById("comment-input")
   const content = input.value.trim()
 
@@ -1121,7 +1285,12 @@ function submitComment(postId) {
   const newComment = {
     id: comments.length + 1,
     postId: postId,
-    author: "익명",
+    author: currentUser.name,
+    avatar: currentUser.avatar,
+    title: currentUser.title,
+    experience: currentUser.experience,
+    company: currentUser.company,
+    verified: currentUser.verified,
     content: content,
     createdAt: new Date(),
   }
@@ -1137,11 +1306,12 @@ function handlePostCreate(e) {
   e.preventDefault()
 
   const title = document.getElementById("post-title").value.trim()
-  const content = document.getElementById("post-content").value.trim()
+  const contentEditor = document.getElementById("post-content-editor")
+  const content = contentEditor.innerHTML.trim()
   const category = document.getElementById("post-category").value
   const tagsInput = document.getElementById("post-tags").value.trim()
 
-  if (!title || !content) {
+  if (!title || !content || content === "<br>" || content === "") {
     alert("제목과 내용을 입력해주세요.")
     return
   }
@@ -1156,10 +1326,14 @@ function handlePostCreate(e) {
   const newPost = {
     id: posts.length + 1,
     title,
-    content,
+    content, // HTML 내용 저장
     category,
     tags,
-    author: "익명",
+    author: currentUser ? currentUser.name : "익명",
+    authorAvatar: currentUser ? currentUser.avatar : "",
+    authorTitle: currentUser ? currentUser.title : "",
+    authorExperience: currentUser ? currentUser.experience : "",
+    authorCompany: currentUser ? currentUser.company : "",
     likes: 0,
     createdAt: new Date(),
   }
@@ -1168,10 +1342,171 @@ function handlePostCreate(e) {
 
   // 폼 초기화
   document.getElementById("post-create-form").reset()
+  contentEditor.innerHTML = ""
 
   // 커뮤니티로 이동
   showView("community")
   alert("게시글이 성공적으로 등록되었습니다!")
+}
+
+// 에디터 초기화 함수
+function initializeEditor() {
+  const toolbar = document.getElementById("editor-toolbar")
+  const editor = document.getElementById("post-content-editor")
+  const previewToggle = document.getElementById("preview-toggle")
+  const previewArea = document.getElementById("content-preview")
+  const previewContent = document.getElementById("preview-content")
+
+  if (!toolbar || !editor) return
+
+  // 툴바 버튼 이벤트
+  toolbar.addEventListener("click", (e) => {
+    const btn = e.target.closest(".editor-btn")
+    if (!btn) return
+
+    e.preventDefault()
+
+    const command = btn.dataset.command
+    const value = btn.dataset.value
+
+    if (command === "createLink") {
+      const url = prompt("링크 URL을 입력하세요:")
+      if (url) {
+        document.execCommand(command, false, url)
+      }
+    } else if (btn.id === "insert-link-btn") {
+      insertLink()
+    } else if (btn.id === "insert-code-btn") {
+      insertCode()
+    } else {
+      document.execCommand(command, false, value)
+    }
+
+    // 에디터에 포커스 유지
+    editor.focus()
+
+    // 버튼 활성 상태 업데이트
+    updateToolbarState()
+  })
+
+  // 에디터 이벤트
+  editor.addEventListener("input", () => {
+    updatePreview()
+  })
+
+  editor.addEventListener("keyup", () => {
+    updateToolbarState()
+  })
+
+  editor.addEventListener("mouseup", () => {
+    updateToolbarState()
+  })
+
+  // 키보드 단축키
+  editor.addEventListener("keydown", (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      switch (e.key) {
+        case "b":
+          e.preventDefault()
+          document.execCommand("bold")
+          updateToolbarState()
+          break
+        case "i":
+          e.preventDefault()
+          document.execCommand("italic")
+          updateToolbarState()
+          break
+        case "u":
+          e.preventDefault()
+          document.execCommand("underline")
+          updateToolbarState()
+          break
+      }
+    }
+  })
+
+  // 미리보기 토글 → 모달로 변경
+  if (previewToggle) {
+    previewToggle.addEventListener("click", () => {
+      const editorHtml = editor.innerHTML
+      const modal = document.getElementById("preview-modal")
+      const modalContent = document.getElementById("preview-modal-content")
+      modalContent.innerHTML = editorHtml || '<span class="text-gray-400">내용이 없습니다.</span>'
+      modal.style.display = "flex"
+      setTimeout(() => { initializeLucideIcons() }, 0)
+    })
+  }
+
+  // 미리보기 모달 닫기 버튼
+  const closePreviewModal = document.getElementById("close-preview-modal")
+  if (closePreviewModal) {
+    closePreviewModal.addEventListener("click", () => {
+      const modal = document.getElementById("preview-modal")
+      modal.style.display = "none"
+    })
+  }
+
+  // 툴바 상태 업데이트 함수
+  function updateToolbarState() {
+    const buttons = toolbar.querySelectorAll(".editor-btn[data-command]")
+
+    buttons.forEach((btn) => {
+      const command = btn.dataset.command
+      const isActive = document.queryCommandState(command)
+
+      if (isActive) {
+        btn.classList.add("active")
+      } else {
+        btn.classList.remove("active")
+      }
+    })
+  }
+
+  // 미리보기 업데이트 함수
+  function updatePreview() {
+    if (previewContent && !previewArea.classList.contains("hidden")) {
+      previewContent.innerHTML = editor.innerHTML
+    }
+  }
+
+  // 링크 삽입 함수
+  function insertLink() {
+    const selection = window.getSelection()
+    const selectedText = selection.toString()
+
+    const url = prompt("링크 URL을 입력하세요:")
+    if (!url) return
+
+    const linkText = selectedText || prompt("링크 텍스트를 입력하세요:", url)
+    if (!linkText) return
+
+    const link = `<a href="${url}" target="_blank">${linkText}</a>`
+
+    if (selectedText) {
+      document.execCommand("insertHTML", false, link)
+    } else {
+      document.execCommand("insertHTML", false, link)
+    }
+  }
+
+  // 코드 삽입 함수
+  function insertCode() {
+    const selection = window.getSelection()
+    const selectedText = selection.toString()
+
+    if (selectedText) {
+      // 선택된 텍스트를 인라인 코드로
+      const code = `<code>${selectedText}</code>`
+      document.execCommand("insertHTML", false, code)
+    } else {
+      // 코드 블록 삽입
+      const codeText = prompt("코드를 입력하세요:")
+      if (codeText) {
+        const codeBlock = `<pre><code>${codeText}</code></pre>`
+        document.execCommand("insertHTML", false, codeBlock)
+      }
+    }
+  }
 }
 
 // 화상 통화 관련 변수
@@ -1439,4 +1774,231 @@ function clearSearch() {
   currentSearchQuery = ""
   isSearchActive = false
   loadCommunityPosts()
+}
+
+// 가상 사용자 데이터
+const mockUsers = [
+  {
+    id: 1,
+    email: 'user@google.com',
+    name: '김개발',
+    avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
+    provider: 'google',
+    title: '프론트엔드 개발자',
+    experience: '3년차',
+    company: '우아한형제들',
+    specialties: ['React', 'TypeScript', 'Next.js'],
+    verified: true
+  },
+  {
+    id: 2,
+    email: 'dev@github.com',
+    name: '박코딩',
+    avatar: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
+    provider: 'github',
+    title: '백엔드 개발자',
+    experience: '5년차',
+    company: '카카오',
+    specialties: ['Node.js', 'Python', 'AWS'],
+    verified: true
+  },
+  {
+    id: 3,
+    email: 'coder@kakao.com',
+    name: '이프론트',
+    avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
+    provider: 'kakao',
+    title: '풀스택 개발자',
+    experience: '2년차',
+    company: '네이버',
+    specialties: ['Vue', 'Spring Boot', 'MongoDB'],
+    verified: false
+  }
+];
+
+// 인증 상태 관리
+let currentUser = null;
+let isLoggedIn = false;
+
+// 로그인 상태 확인 함수
+function checkAuthRequired(action) {
+    if (!isLoggedIn) {
+        showLoginModal();
+        return false;
+    }
+    return true;
+}
+
+// 로그인 모달 표시
+function showLoginModal() {
+    const modal = document.getElementById('login-modal');
+    modal.style.display = 'flex';
+}
+
+// 로그인 모달 숨기기
+function hideLoginModal() {
+    const modal = document.getElementById('login-modal');
+    modal.style.display = 'none';
+}
+
+// 토스트 알림 함수
+function showToast(message, icon = null) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  if (icon) {
+    toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i> <span>${message}</span>`;
+  } else {
+    toast.textContent = message;
+  }
+  container.appendChild(toast);
+  // 아이콘 렌더링
+  if (window.lucide) setTimeout(() => window.lucide.createIcons(), 0);
+  // 2초 후 사라짐
+  setTimeout(() => {
+    toast.classList.add('toast-out');
+    setTimeout(() => {
+      toast.remove();
+    }, 500);
+  }, 2000);
+}
+
+// 소셜 로그인 처리
+function handleSocialLogin(provider) {
+    // 가상 로그인 처리
+    const user = mockUsers.find(u => u.provider === provider);
+    if (user) {
+        currentUser = user;
+        isLoggedIn = true;
+        updateAuthUI();
+        hideLoginModal();
+        // 토스트 알림
+        showToast(`${user.name}님, 환영합니다!`, 'smile');
+    }
+}
+
+// 로그아웃 처리
+function handleLogout() {
+    currentUser = null;
+    isLoggedIn = false;
+    updateAuthUI();
+    
+    // 메인 페이지로 이동
+    showView('main');
+    
+    // 토스트 알림
+    showToast('로그아웃되었습니다.', 'log-out');
+    // 좋아요 상태 초기화
+    localStorage.removeItem('likedPosts');
+    // 커뮤니티 피드/상세 등 하트 색상 즉시 반영
+    if (document.getElementById('community-view') && document.getElementById('community-view').classList.contains('active')) {
+      loadCommunityPosts();
+    }
+    if (document.getElementById('post-detail-view') && document.getElementById('post-detail-view').classList.contains('active')) {
+      if (typeof currentPostId !== 'undefined' && currentPostId) {
+        loadPostDetail(currentPostId);
+      }
+    }
+}
+
+// 인증 UI 업데이트
+function updateAuthUI() {
+    const loggedOutElements = document.getElementById('auth-logged-out');
+    const loggedInElements = document.getElementById('auth-logged-in');
+    const userAvatar = document.getElementById('user-avatar');
+    const userName = document.getElementById('user-name');
+    // 커뮤니티 뷰용
+    const loggedOutCommunity = document.getElementById('auth-logged-out-community');
+    const loginBtnCommunity = document.getElementById('login-btn-community');
+    const loggedInCommunity = document.getElementById('auth-logged-in-community');
+    const userAvatarCommunity = document.getElementById('user-avatar-community');
+    const userNameCommunity = document.getElementById('user-name-community');
+    const logoutBtnCommunity = document.getElementById('logout-btn-community');
+    // 멘토 리스트(커피챗) 뷰용
+    const loggedOutMentor = document.getElementById('auth-logged-out-mentor');
+    const loginBtnMentor = document.getElementById('login-btn-mentor');
+    const loggedInMentor = document.getElementById('auth-logged-in-mentor');
+    const userAvatarMentor = document.getElementById('user-avatar-mentor');
+    const userNameMentor = document.getElementById('user-name-mentor');
+    const logoutBtnMentor = document.getElementById('logout-btn-mentor');
+    // 게시글 상세 뷰용
+    const loggedOutPostDetail = document.getElementById('auth-logged-out-postdetail');
+    const loginBtnPostDetail = document.getElementById('login-btn-postdetail');
+    const loggedInPostDetail = document.getElementById('auth-logged-in-postdetail');
+    const userAvatarPostDetail = document.getElementById('user-avatar-postdetail');
+    const userNamePostDetail = document.getElementById('user-name-postdetail');
+    const logoutBtnPostDetail = document.getElementById('logout-btn-postdetail');
+
+    if (isLoggedIn && currentUser) {
+        loggedOutElements.style.display = 'none';
+        loggedInElements.style.display = 'flex';
+        if (loggedOutCommunity) loggedOutCommunity.style.display = 'none';
+        if (loggedInCommunity) loggedInCommunity.style.display = 'flex';
+        if (userAvatar) userAvatar.src = currentUser.avatar;
+        if (userName) userName.textContent = currentUser.name;
+        if (userAvatarCommunity) userAvatarCommunity.src = currentUser.avatar;
+        if (userNameCommunity) userNameCommunity.textContent = currentUser.name;
+        // 멘토 리스트(커피챗) 뷰용
+        if (loggedOutMentor) loggedOutMentor.style.display = 'none';
+        if (loggedInMentor) loggedInMentor.style.display = 'flex';
+        if (userAvatarMentor) userAvatarMentor.src = currentUser.avatar;
+        if (userNameMentor) userNameMentor.textContent = currentUser.name;
+        if (loggedOutPostDetail) loggedOutPostDetail.style.display = 'none';
+        if (loggedInPostDetail) loggedInPostDetail.style.display = 'flex';
+        if (userAvatarPostDetail) userAvatarPostDetail.src = currentUser.avatar;
+        if (userNamePostDetail) userNamePostDetail.textContent = currentUser.name;
+    } else {
+        loggedOutElements.style.display = 'flex';
+        loggedInElements.style.display = 'none';
+        if (loggedOutCommunity) loggedOutCommunity.style.display = 'flex';
+        if (loggedInCommunity) loggedInCommunity.style.display = 'none';
+        // 멘토 리스트(커피챗) 뷰용
+        if (loggedOutMentor) loggedOutMentor.style.display = 'flex';
+        if (loggedInMentor) loggedInMentor.style.display = 'none';
+        if (loggedOutPostDetail) loggedOutPostDetail.style.display = 'flex';
+        if (loggedInPostDetail) loggedInPostDetail.style.display = 'none';
+    }
+    // 커뮤니티 로그인 버튼 이벤트 연결
+    if (loginBtnCommunity) {
+        loginBtnCommunity.onclick = showLoginModal;
+    }
+    // 멘토 리스트(커피챗) 로그인/로그아웃 버튼 이벤트 연결
+    if (loginBtnMentor) {
+        loginBtnMentor.onclick = showLoginModal;
+    }
+    if (logoutBtnMentor) {
+        logoutBtnMentor.onclick = handleLogout;
+    }
+    // 게시글 상세 로그인/로그아웃 버튼 이벤트 연결
+    if (loginBtnPostDetail) {
+        loginBtnPostDetail.onclick = () => {
+            showLoginModal();
+            // 로그인 모달이 닫힌 후(로그인 성공 시) 댓글 입력창 갱신
+            const observer = new MutationObserver(() => {
+                if (document.getElementById('login-modal').style.display === 'none') {
+                    if (document.getElementById('post-detail-view') && document.getElementById('post-detail-view').classList.contains('active')) {
+                        if (typeof currentPostId !== 'undefined' && currentPostId) {
+                            loadPostDetail(currentPostId);
+                        }
+                    }
+                    observer.disconnect();
+                }
+            });
+            observer.observe(document.getElementById('login-modal'), { attributes: true, attributeFilter: ['style'] });
+        };
+    }
+    if (logoutBtnPostDetail) {
+        logoutBtnPostDetail.onclick = () => {
+            handleLogout();
+            if (document.getElementById('post-detail-view') && document.getElementById('post-detail-view').classList.contains('active')) {
+                if (typeof currentPostId !== 'undefined' && currentPostId) {
+                    loadPostDetail(currentPostId);
+                }
+            }
+        };
+    }
+    // 커뮤니티 로그아웃 버튼 이벤트 연결
+    if (logoutBtnCommunity) {
+        logoutBtnCommunity.onclick = handleLogout;
+    }
 }
