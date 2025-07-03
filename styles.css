@@ -422,19 +422,19 @@ body {
 .gradient-button {
   background: linear-gradient(135deg, #f97316, #f59e0b);
   border: none;
-  cursor: pointer;
+  /* cursor: pointer; */
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   font-weight: 500;
-  transition: all 0.3s ease;
+  /* ransition: all 0.3s ease; */
 }
-
+/*
 .gradient-button:hover {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
 }
-
+*/
 .card-hover {
   transition: all 0.3s ease;
 }
