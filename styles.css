@@ -1781,3 +1781,161 @@ button {
 #community-category-tabs {
   background: inherit !important;
 }
+
+/* 멘토 탭 버튼 - 게시글 카테고리 탭과 완전히 동일하게 */
+.mentor-tab-btn {
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  color: #374151;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+  border-radius: 0.75rem;
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  outline: none;
+  cursor: pointer;
+}
+.mentor-tab-btn.active,
+.mentor-tab-btn:focus,
+.mentor-tab-btn:hover {
+  background: #fff7ed;
+  border-color: #fbbf24;
+  color: #ea580c;
+  box-shadow: 0 4px 16px rgba(249, 191, 36, 0.10);
+  z-index: 1;
+}
+@media (max-width: 600px) {
+  .mentor-tab-btn {
+    font-size: 0.95rem;
+    padding: 0.5rem 0.9rem;
+  }
+}
+
+#active-chat-list {
+  margin-top: 1.5rem;
+}
+.active-chat-card {
+  background: #fff;
+  border: 1px solid #ffedd5;
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.active-chat-card:hover {
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.08);
+  border-color: #fdba74;
+}
+.active-chat-card .avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 2px solid #ffedd5;
+}
+.active-chat-card .info {
+  flex: 1;
+}
+.active-chat-card .name {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+.active-chat-card .position {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+.active-chat-card .last-message {
+  color: #ea580c;
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+}
+.active-chat-card .status-badge {
+  margin-left: 0.5rem;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.7rem;
+  font-weight: 500;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.mentor-chat-report-btn {
+  background: linear-gradient(135deg, #f97316, #f59e0b);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  color: #fff;
+  padding: 0;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 1rem;
+}
+.mentor-chat-report-btn i {
+  color: #fffbe8;
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+.mentor-chat-report-btn:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  background: #fff;
+  border-top: 1.5px solid #ffedd5;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 60px;
+  z-index: 100;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.04);
+}
+.bottom-nav-btn {
+  background: none;
+  border: none;
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.95rem;
+  color: #ea580c;
+  padding: 0 12px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.bottom-nav-btn.active,
+.bottom-nav-btn:hover {
+  color: #f97316;
+}
+.bottom-nav-btn i {
+  width: 24px;
+  height: 24px;
+}
+@media (min-width: 768px) {
+  .bottom-nav {
+    max-width: 480px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 1.5rem 1.5rem 0 0;
+  }
+}

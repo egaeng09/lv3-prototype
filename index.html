@@ -52,7 +52,7 @@
                         <div class="flex items-center gap-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 gradient-button rounded-xl flex items-center justify-center text-white">
-                                    <i data-lucide="coffee"></i>
+                                <i data-lucide="coffee"></i>
                                 </div>
                                 <div>
                                     <h1 class="text-xl font-bold text-gray-800">멘토링 할래 말래</h1>
@@ -179,7 +179,7 @@
                                 </div>
                                 <button id="logout-btn-mentor" class="text-gray-600 hover:bg-orange-100 rounded-lg p-2">
                                     <i data-lucide="log-out" class="w-5 h-5"></i>
-                                </button>
+                        </button>
                                 <div class="bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-sm font-medium">
                                     Beta v1.0
                                 </div>
@@ -188,18 +188,13 @@
                     </div>
                 </div>
             </header>
-
-            <div class="max-w-6xl mx-auto px-4 py-8">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">추천 멘토</h2>
-                    <p class="text-gray-600" id="online-count">
-                        멘토 정보를 불러오는 중...
-                    </p>
+            <div class="max-w-6xl mx-auto px-4 py-4">
+                <div class="flex gap-2 mb-6" id="mentor-tabs">
+                    <button id="tab-all-mentors" class="mentor-tab-btn active">전체 멘토</button>
+                    <button id="tab-active-chats" class="mentor-tab-btn">내 커피챗</button>
                 </div>
-
-                <div id="mentor-grid" class="grid lg:grid-cols-2 gap-6">
-                    <!-- 멘토 카드들이 여기에 동적으로 추가됩니다 -->
-                </div>
+                <div id="mentor-grid" class="grid lg:grid-cols-2 gap-6"></div>
+                <div id="active-chat-list" style="display:none;"></div>
             </div>
         </div>
 
@@ -231,6 +226,9 @@
 
             <div class="bg-white border-t border-orange-100 p-4">
                 <div class="flex gap-3 max-w-4xl mx-auto">
+                    <button id="mentor-chat-report-btn" class="mentor-chat-report-btn" title="신고하기">
+                        <i data-lucide="alert-triangle"></i>
+                    </button>
                     <input
                         type="text"
                         id="chat-input"
@@ -537,7 +535,7 @@
                                 <button id="login-btn-postdetail" class="gradient-button text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
                                     <i data-lucide="log-in" class="w-4 h-4 mr-2"></i>
                                     로그인
-                                </button>
+                        </button>
                                 <div class="bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-sm font-medium">
                                     Beta v1.0
                                 </div>
@@ -733,8 +731,34 @@
 </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- 하단 네비게이션 바 -->
+    <nav id="bottom-nav" class="bottom-nav">
+      <button id="nav-coffeechat" class="bottom-nav-btn">
+        <i data-lucide="coffee"></i>
+        <span>커피챗</span>
+      </button>
+      <button id="nav-community" class="bottom-nav-btn">
+        <i data-lucide="messages-square"></i>
+        <span>커뮤니티</span>
+      </button>
+    </nav>
+
     <!-- 토스트 알림 컨테이너 -->
     <div id="toast-container" style="position:fixed;bottom:2.5rem;left:50%;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;align-items:center;gap:0.5rem;"></div>
+
+    <!-- 채팅방 신고 모달 -->
+    <div id="mentor-chat-report-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h2 class="text-lg font-bold mb-4">멘토 신고하기</h2>
+            <label for="mentor-chat-report-reason" class="block mb-2">신고 사유를 입력하세요</label>
+            <textarea id="mentor-chat-report-reason" class="w-full border border-gray-300 rounded-lg p-2 mb-4" rows="4" placeholder="신고 사유를 입력해주세요"></textarea>
+            <div class="flex justify-end gap-2">
+                <button id="mentor-chat-report-cancel" class="modal-cancel-btn">취소</button>
+                <button id="mentor-chat-report-submit" class="modal-confirm-btn bg-yellow-400 text-white">신고</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

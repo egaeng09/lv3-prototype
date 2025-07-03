@@ -1,3 +1,18 @@
+  // 하단 네비게이션 바 이동 및 active 처리 (최상단 전역 선언)
+
+function updateBottomNavActive(view) {
+  const coffeeBtn = document.getElementById('nav-coffeechat');
+  const commuBtn = document.getElementById('nav-community');
+  if (!coffeeBtn || !commuBtn) return;
+  coffeeBtn.classList.remove('active');
+  commuBtn.classList.remove('active');
+  if (['mentor-list-view', 'chat-view'].includes(view)) {
+    coffeeBtn.classList.add('active');
+  } else if (['community-view', 'post-create-view', 'post-detail-view'].includes(view)) {
+    commuBtn.classList.add('active');
+  }
+}
+
 // 멘토 데이터를 localStorage에서 불러오거나 기본값 사용
 function getMentors() {
   const savedMentors = localStorage.getItem("mentors")
@@ -6,55 +21,55 @@ function getMentors() {
   }
   return [
     {
-      id: 1,
-      name: "김현우",
-      position: "Senior Frontend Developer",
-      company: "우아한형제들",
-      location: "서울",
-      rating: 4.9,
-      reviews: 127,
-      specialties: ["React", "TypeScript", "Next.js", "포트폴리오 리뷰"],
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      isOnline: true,
+        id: 1,
+        name: "김현우",
+        position: "Senior Frontend Developer",
+        company: "우아한형제들",
+        location: "서울",
+        rating: 4.9,
+        reviews: 127,
+        specialties: ["React", "TypeScript", "Next.js", "포트폴리오 리뷰"],
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+        isOnline: true,
       responseTime: "평균 5분",
     },
     {
-      id: 2,
-      name: "박지영",
-      position: "Lead Backend Developer",
-      company: "카카오",
-      location: "판교",
-      rating: 4.8,
-      reviews: 89,
-      specialties: ["Spring Boot", "AWS", "MSA", "면접 준비"],
+        id: 2,
+        name: "박지영",
+        position: "Lead Backend Developer",
+        company: "카카오",
+        location: "판교",
+        rating: 4.8,
+        reviews: 89,
+        specialties: ["Spring Boot", "AWS", "MSA", "면접 준비"],
       avatar: "https://www.gravatar.com/avatar/?d=mp",
-      isOnline: true,
+        isOnline: true,
       responseTime: "평균 10분",
     },
     {
-      id: 3,
-      name: "이수진",
-      position: "Full Stack Developer",
-      company: "네이버",
-      location: "분당",
-      rating: 4.9,
-      reviews: 156,
-      specialties: ["Vue.js", "Node.js", "DevOps", "커리어 상담"],
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-      isOnline: false,
+        id: 3,
+        name: "이수진",
+        position: "Full Stack Developer",
+        company: "네이버",
+        location: "분당",
+        rating: 4.9,
+        reviews: 156,
+        specialties: ["Vue.js", "Node.js", "DevOps", "커리어 상담"],
+        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+        isOnline: false,
       responseTime: "평균 30분",
     },
     {
-      id: 4,
-      name: "최민호",
-      position: "Mobile Developer",
-      company: "라인",
-      location: "신분당",
-      rating: 4.7,
-      reviews: 94,
-      specialties: ["React Native", "Flutter", "iOS", "앱 출시"],
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-      isOnline: true,
+        id: 4,
+        name: "최민호",
+        position: "Mobile Developer",
+        company: "라인",
+        location: "신분당",
+        rating: 4.7,
+        reviews: 94,
+        specialties: ["React Native", "Flutter", "iOS", "앱 출시"],
+        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+        isOnline: true,
       responseTime: "평균 15분",
     },
   ]
@@ -242,7 +257,7 @@ let currentView = "main"
 let selectedMentor = null
 let messages = []
 let currentPostId = null
-const currentCategory = "all"
+let currentCategory = "all"
 
 // 전역 변수에 검색 관련 변수 추가
 let currentSearchQuery = ""
@@ -250,13 +265,13 @@ let isSearchActive = false
 
 // DOM 요소들
 const views = {
-  main: document.getElementById("main-view"),
-  mentorList: document.getElementById("mentor-list-view"),
-  chat: document.getElementById("chat-view"),
-  community: document.getElementById("community-view"),
-  postCreate: document.getElementById("post-create-view"),
-  postDetail: document.getElementById("post-detail-view"),
-}
+  'main-view': document.getElementById('main-view'),
+  'mentor-list-view': document.getElementById('mentor-list-view'),
+  'chat-view': document.getElementById('chat-view'),
+  'community-view': document.getElementById('community-view'),
+  'post-create-view': document.getElementById('post-create-view'),
+  'post-detail-view': document.getElementById('post-detail-view'),
+};
 
 // Lucide 아이콘 초기화 함수
 function initializeLucideIcons() {
@@ -267,14 +282,14 @@ function initializeLucideIcons() {
 
 // 초기화
 document.addEventListener("DOMContentLoaded", () => {
-  // Lucide 아이콘 초기화
+    // Lucide 아이콘 초기화
   initializeLucideIcons()
-
-  // 이벤트 리스너 등록
+    
+    // 이벤트 리스너 등록
   setupEventListeners()
 
   // 첫 번째 뷰 표시
-  showView("main")
+  showView("main-view")
 
   // 인증 UI 초기화
   updateAuthUI();
@@ -286,20 +301,39 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById('google-login').addEventListener('click', () => handleSocialLogin('google'));
   document.getElementById('github-login').addEventListener('click', () => handleSocialLogin('github'));
   document.getElementById('kakao-login').addEventListener('click', () => handleSocialLogin('kakao'));
+
+  // 네비게이션 버튼 클릭 이벤트
+  if (document.getElementById('nav-coffeechat')) {
+    document.getElementById('nav-coffeechat').onclick = () => showView('mentor-list-view');
+  }
+  if (document.getElementById('nav-community')) {
+    document.getElementById('nav-community').onclick = () => showView('community-view');
+  }
+
+  // showView 함수 오버라이드
+  const _originShowView = showView;
+  showView = function(view) {
+    _originShowView(view);
+    updateBottomNavActive(view);
+    if (window.lucide) setTimeout(() => lucide.createIcons(), 0);
+  }
+
+  // 최초 진입 시 하단 네비 active 처리
+  updateBottomNavActive('main');
 })
 
 // 이벤트 리스너 설정
 function setupEventListeners() {
   // 메인 네비게이션
-  document.getElementById("start-coffee-chat").addEventListener("click", () => showView("mentorList"))
-  document.getElementById("join-community").addEventListener("click", () => showView("community"))
+  document.getElementById("start-coffee-chat").addEventListener("click", () => showView("mentor-list-view"))
+  document.getElementById("join-community").addEventListener("click", () => showView("community-view"))
 
   // 뒤로 가기 버튼들
-  document.getElementById("back-to-main").addEventListener("click", () => showView("main"))
-  document.getElementById("back-to-list").addEventListener("click", () => showView("mentorList"))
-  document.getElementById("back-to-main-from-community").addEventListener("click", () => showView("main"))
-  document.getElementById("back-to-community").addEventListener("click", () => showView("community"))
-  document.getElementById("back-to-community-from-detail").addEventListener("click", () => showView("community"))
+  document.getElementById("back-to-main").addEventListener("click", () => showView("main-view"))
+  document.getElementById("back-to-list").addEventListener("click", () => showView("mentor-list-view"))
+  document.getElementById("back-to-main-from-community").addEventListener("click", () => showView("main-view"))
+  document.getElementById("back-to-community").addEventListener("click", () => showView("community-view"))
+  document.getElementById("back-to-community-from-detail").addEventListener("click", () => showView("community-view"))
 
   // 커뮤니티 관련
   document.getElementById("go-to-post-create").addEventListener("click", () => {
@@ -309,7 +343,7 @@ function setupEventListeners() {
     }
     showView("postCreate");
   });
-  document.getElementById("cancel-post").addEventListener("click", () => showView("community"))
+  document.getElementById("cancel-post").addEventListener("click", () => showView("community-view"))
 
   // 게시글 작성 폼
   document.getElementById("post-create-form").addEventListener("submit", handlePostCreate)
@@ -364,6 +398,38 @@ function setupEventListeners() {
           showView('postCreate');
       };
   }
+
+  // 채팅방 신고 버튼 이벤트 연결
+  const chatReportBtn = document.getElementById('mentor-chat-report-btn');
+  if (chatReportBtn) {
+    chatReportBtn.onclick = () => {
+      document.getElementById('mentor-chat-report-modal').style.display = 'flex';
+      document.getElementById('mentor-chat-report-reason').value = '';
+    };
+    // lucide 아이콘 초기화
+    if (window.lucide) lucide.createIcons();
+  }
+  // 채팅방 신고 모달 버튼 이벤트 연결
+  const chatReportCancel = document.getElementById('mentor-chat-report-cancel');
+  const chatReportSubmit = document.getElementById('mentor-chat-report-submit');
+  if (chatReportCancel) {
+    chatReportCancel.onclick = () => {
+      document.getElementById('mentor-chat-report-modal').style.display = 'none';
+    };
+  }
+  if (chatReportSubmit) {
+    chatReportSubmit.onclick = () => {
+      const reason = document.getElementById('mentor-chat-report-reason').value.trim();
+      if (!reason) {
+        showToast('신고 사유를 입력해주세요.', 'alert-triangle');
+        return;
+      }
+      // 신고 내역 처리(여기서는 콘솔 출력, 추후 서버 연동 가능)
+      console.log('멘토 채팅방 신고:', selectedMentor ? selectedMentor.name : '', reason);
+      showToast('신고가 접수되었습니다.', 'alert-triangle');
+      document.getElementById('mentor-chat-report-modal').style.display = 'none';
+    };
+  }
 }
 
 // 커피챗 평가 관련 이벤트 리스너 설정
@@ -414,7 +480,7 @@ function setupCoffeeChatEvaluation() {
     const kind = (document.querySelector('input[name="eval-kind"]:checked') || {}).value
 
     if (!star || !kind) {
-      alert("별점과 친절도 선택은 필수입니다.")
+      showToast("별점과 친절도 선택은 필수입니다.", "alert-triangle");
       return
     }
 
@@ -430,7 +496,7 @@ function setupCoffeeChatEvaluation() {
     selectedMentor = mentors.find((m) => m.id === selectedMentor.id)
 
     document.getElementById("coffeechat-eval-modal").style.display = "none"
-    alert("평가가 저장되었습니다! 멘토의 평점이 업데이트되었습니다.")
+    showToast("평가가 저장되었습니다! 멘토의 평점이 업데이트되었습니다.", "check");
   }
 
   // 평가 취소
@@ -547,42 +613,114 @@ window.showEvalResult = (mentorId) => {
 // 뷰 전환
 function showView(viewName) {
   // 모든 뷰 숨기기
-  Object.values(views).forEach((view) => view.classList.remove("active"))
+  Object.values(views).forEach((view) => view && view.classList.remove("active"));
 
-  // 선택된 뷰 보이기
-  views[viewName].classList.add("active")
-  currentView = viewName
+  // 선택된 뷰 보이기 (존재할 때만)
+  if (!views[viewName]) {
+    console.warn("존재하지 않는 뷰:", viewName);
+    return;
+  }
+  views[viewName].classList.add("active");
+  currentView = viewName;
 
   // 뷰별 초기화
-  if (viewName === "mentorList") {
-    loadMentors()
-  } else if (viewName === "chat" && selectedMentor) {
-    initializeChat()
-  } else if (viewName === "community") {
-    loadCommunityPosts()
-    setupCommunityCategoryTabs()
-  } else if (viewName === "postCreate") {
-    // 에디터 초기화
+  if (viewName === "mentor-list-view") {
+    loadMentors();
+  } else if (viewName === "chat-view" && selectedMentor) {
+    initializeChat();
+  } else if (viewName === "community-view") {
+    loadCommunityPosts();
+    setupCommunityCategoryTabs();
+  } else if (viewName === "post-create-view") {
     setTimeout(() => {
-      initializeEditor()
-      initializeLucideIcons()
-    }, 100)
-  } else if (viewName === "postDetail" && currentPostId) {
-    loadPostDetail(currentPostId)
+      initializeEditor();
+      initializeLucideIcons();
+    }, 100);
+  } else if (viewName === "post-detail-view" && currentPostId) {
+    loadPostDetail(currentPostId);
   }
 
   // 아이콘 다시 초기화
   setTimeout(() => {
-    initializeLucideIcons()
-  }, 100)
+    initializeLucideIcons();
+  }, 100);
+
+  // 하단 네비게이션 바 이동 및 active 처리
+  updateBottomNavActive(viewName);
 }
 
 // 멘토 목록 로드
 function loadMentors() {
-  // 최신 멘토 데이터 불러오기
-  mentors = getMentors()
-  renderMentorList(mentors)
-  updateOnlineCount(mentors)
+  mentors = getMentors();
+  // 탭 초기화
+  document.getElementById('tab-all-mentors').classList.add('active');
+  document.getElementById('tab-active-chats').classList.remove('active');
+  document.getElementById('mentor-grid').style.display = '';
+  document.getElementById('active-chat-list').style.display = 'none';
+  renderMentorList(mentors);
+  updateOnlineCount(mentors);
+}
+
+// 탭 이벤트 리스너 등록
+setTimeout(() => {
+  const tabAll = document.getElementById('tab-all-mentors');
+  const tabActive = document.getElementById('tab-active-chats');
+  if (tabAll && tabActive) {
+    tabAll.onclick = () => {
+      tabAll.classList.add('active');
+      tabActive.classList.remove('active');
+      document.getElementById('mentor-grid').style.display = '';
+      document.getElementById('active-chat-list').style.display = 'none';
+      renderMentorList(mentors);
+      updateOnlineCount(mentors);
+    };
+    tabActive.onclick = () => {
+      if (!isLoggedIn) {
+        showLoginModal();
+        return;
+      }
+      tabAll.classList.remove('active');
+      tabActive.classList.add('active');
+      document.getElementById('mentor-grid').style.display = 'none';
+      document.getElementById('active-chat-list').style.display = '';
+      renderActiveChats();
+    };
+  }
+}, 300);
+
+// 진행중 커피챗 리스트 렌더링
+function renderActiveChats() {
+  const list = document.getElementById('active-chat-list');
+  list.innerHTML = '';
+  // 이력이 있는 멘토만 추출
+  const activeMentors = Object.keys(messagesByMentor)
+    .map(id => mentors.find(m => m.id === Number(id)))
+    .filter(Boolean);
+  if (activeMentors.length === 0) {
+    list.innerHTML = '<div class="text-gray-500 text-center py-8">진행 중인 커피챗 이력이 없습니다.</div>';
+    return;
+  }
+  activeMentors.forEach(mentor => {
+    const lastMsgArr = messagesByMentor[mentor.id];
+    const lastMsg = lastMsgArr && lastMsgArr.length > 0 ? lastMsgArr[lastMsgArr.length-1].content : '';
+    const card = document.createElement('div');
+    card.className = 'active-chat-card';
+    card.onclick = () => startChat(mentor.id);
+    card.innerHTML = `
+      <img src="${mentor.avatar}" class="avatar" alt="${mentor.name}" />
+      <div class="info">
+        <div class="name">
+          ${mentor.name}
+          <span class="status-badge ${mentor.isOnline ? 'online' : 'offline'}">
+            ${mentor.isOnline ? '온라인' : '오프라인'}
+          </span>
+        </div>
+        <div class="position">${mentor.position} @ ${mentor.company}</div>
+        <div class="last-message">${lastMsg ? lastMsg : ''}</div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
 }
 
 // 멘토 리스트 렌더링
@@ -600,8 +738,8 @@ function renderMentorList(mentors) {
 function createMentorCard(mentor) {
   const card = document.createElement("div")
   card.className = "mentor-card"
-
-  card.innerHTML = `
+    
+    card.innerHTML = `
           <div class="flex items-start justify-between mb-4">
               <div class="flex items-center gap-3">
                   <div class="relative">
@@ -612,41 +750,41 @@ function createMentorCard(mentor) {
                           style="width: 3rem; height: 3rem; object-fit: cover;"
                       />
                       <div class="online-indicator ${mentor.isOnline ? "" : "offline"}"></div>
-                  </div>
+                </div>
                   <div>
                       <h3 class="text-lg font-semibold text-gray-800">${mentor.name}</h3>
                       <p class="text-sm text-gray-600">${mentor.position} at ${mentor.company}</p>
-                  </div>
-              </div>
+                </div>
+            </div>
               <div class="status-badge ${mentor.isOnline ? "online" : "offline"}">
                   ${mentor.isOnline ? "온라인" : "오프라인"}
-              </div>
-          </div>
-          
+            </div>
+        </div>
+        
           <div class="flex items-center justify-between mb-4 text-sm text-gray-600">
               <div class="flex items-center gap-1">
                   <i data-lucide="star" style="width: 1rem; height: 1rem; fill: #fbbf24; color: #fbbf24;"></i>
-                  <span>${mentor.rating}</span>
-                  <span>(${mentor.reviews}개 리뷰)</span>
-              </div>
+                <span>${mentor.rating}</span>
+                <span>(${mentor.reviews}개 리뷰)</span>
+            </div>
               <div class="flex items-center gap-1">
-                  <i data-lucide="map-pin" style="width: 1rem; height: 1rem;"></i>
-                  <span>${mentor.location}</span>
-              </div>
-          </div>
-          
+                <i data-lucide="map-pin" style="width: 1rem; height: 1rem;"></i>
+                <span>${mentor.location}</span>
+            </div>
+        </div>
+        
           <div class="flex items-center gap-2 mb-4 text-sm text-gray-600">
-              <i data-lucide="clock" style="width: 1rem; height: 1rem;"></i>
-              <span>${mentor.responseTime} 내 응답</span>
-          </div>
-          
+            <i data-lucide="clock" style="width: 1rem; height: 1rem;"></i>
+            <span>${mentor.responseTime} 내 응답</span>
+        </div>
+        
           <div class="mb-6">
               <p class="text-sm font-medium text-gray-700 mb-2">전문 분야</p>
               <div class="flex flex-wrap gap-2">
                   ${mentor.specialties.map((specialty) => `<span class="specialty-tag">${specialty}</span>`).join("")}
-              </div>
-          </div>
-          
+            </div>
+        </div>
+        
           <div class="flex flex-col gap-2 mt-2">
               <button class="eval-result-btn" onclick="showEvalResult(${mentor.id})">
                   <i data-lucide="clipboard-list" class="w-4 h-4"></i>
@@ -654,11 +792,11 @@ function createMentorCard(mentor) {
               </button>
               <button class="w-full gradient-button text-white shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 rounded-lg" onclick="startChat(${mentor.id})" style="padding: 0.75rem 1rem; min-height: 48px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 500;">
                   <i data-lucide="message-circle" style="width: 1rem; height: 1rem;"></i>
-                  커피챗 시작하기
-              </button>
+            커피챗 시작하기
+        </button>
           </div>
       `
-
+    
   return card
 }
 
@@ -666,9 +804,9 @@ function createMentorCard(mentor) {
 function updateOnlineCount(mentors) {
   const onlineCount = mentors.filter((mentor) => mentor.isOnline).length
   const onlineCountElement = document.getElementById("online-count")
-  if (onlineCountElement) {
+    if (onlineCountElement) {
     onlineCountElement.textContent = `현재 ${onlineCount}명의 멘토가 온라인 상태입니다`
-  }
+    }
 }
 
 // 채팅 시작
@@ -678,21 +816,21 @@ function startChat(mentorId) {
     return;
   }
   selectedMentor = mentors.find((mentor) => mentor.id === mentorId)
-  if (selectedMentor) {
+    if (selectedMentor) {
     // 해당 멘토의 메시지 로드 또는 초기화
     if (!messagesByMentor[mentorId]) {
       messagesByMentor[mentorId] = []
     }
     messages = messagesByMentor[mentorId]
-    showView("chat")
-  }
+    showView("chat-view")
+    }
 }
 
 // 채팅 초기화
 function initializeChat() {
   if (!selectedMentor) return
-
-  // 멘토 정보 업데이트
+    
+    // 멘토 정보 업데이트
   const mentorInfo = document.getElementById("chat-mentor-info")
   mentorInfo.innerHTML = `
           <div class="relative">
@@ -721,8 +859,8 @@ function initializeChat() {
       addMessage("bot", getRandomResponse("greetings"))
     }, 1000)
   }
-
-  // 입력 필드 포커스
+    
+    // 입력 필드 포커스
   document.getElementById("chat-input").focus()
 }
 
@@ -741,16 +879,19 @@ function renderChatMessages() {
 
 // 메시지 전송
 function sendMessage() {
-  const input = document.getElementById("chat-input")
-  const message = input.value.trim()
-
-  if (!message || !selectedMentor) return
-
-  // 사용자 메시지 추가
+  const chatInput = document.getElementById("chat-input");
+  const message = chatInput.value.trim();
+  if (!message) {
+    showToast('메시지를 입력해주세요.', 'alert-triangle');
+    return;
+  }
+  if (!selectedMentor) return
+    
+    // 사용자 메시지 추가
   addMessage("user", message)
-  input.value = ""
-
-  // 봇 응답 (지연 후)
+  chatInput.value = ""
+    
+    // 봇 응답 (지연 후)
   setTimeout(
     () => {
       const response = generateBotResponse(message)
@@ -758,7 +899,7 @@ function sendMessage() {
 
       // '전화' 키워드가 포함된 경우 3초 후 전화 도착
       if (message.toLowerCase().includes("전화")) {
-        setTimeout(() => {
+    setTimeout(() => {
           showIncomingCallModal()
         }, 3000)
       }
@@ -773,10 +914,10 @@ function createMessageElement(msg) {
   messageElement.className = `message ${msg.sender}`
 
   const timeString = formatTime(new Date(msg.createdAt))
-
-  messageElement.innerHTML = `
+    
+    messageElement.innerHTML = `
           <div>${msg.content}</div>
-          <div class="message-time">${timeString}</div>
+        <div class="message-time">${timeString}</div>
       `
 
   return messageElement
@@ -800,6 +941,11 @@ function addMessage(sender, text) {
   chatMessages.appendChild(messageElement)
 
   scrollToBottom()
+  // 진행중 커피챗 탭이 열려있으면 실시간 반영
+  const tabActive = document.getElementById('tab-active-chats');
+  if (tabActive && tabActive.classList.contains('active')) {
+    renderActiveChats();
+  }
 }
 
 // 스크롤을 맨 아래로
@@ -862,9 +1008,9 @@ function generateBotResponse(userMessage) {
     return getRandomResponse("technical")
   } else if (lowerMessage.includes("안녕") || lowerMessage.includes("반갑") || lowerMessage.includes("hi")) {
     return getRandomResponse("greetings")
-  } else {
+    } else {
     return getRandomResponse("default")
-  }
+    }
 }
 
 // 봇 응답 생성
@@ -1280,7 +1426,10 @@ function submitComment(postId) {
   const input = document.getElementById("comment-input")
   const content = input.value.trim()
 
-  if (!content) return
+  if (!content) {
+    showToast("댓글을 입력해주세요.", "alert-triangle");
+    return;
+  }
 
   const newComment = {
     id: comments.length + 1,
@@ -1312,7 +1461,7 @@ function handlePostCreate(e) {
   const tagsInput = document.getElementById("post-tags").value.trim()
 
   if (!title || !content || content === "<br>" || content === "") {
-    alert("제목과 내용을 입력해주세요.")
+    showToast("제목과 내용을 입력해주세요.", "alert-triangle");
     return
   }
 
@@ -1346,7 +1495,7 @@ function handlePostCreate(e) {
 
   // 커뮤니티로 이동
   showView("community")
-  alert("게시글이 성공적으로 등록되었습니다!")
+  showToast("게시글이 성공적으로 등록되었습니다!", "check");
 }
 
 // 에디터 초기화 함수
@@ -1735,6 +1884,7 @@ function setupCommunityCategoryTabs() {
       this.classList.add("active")
 
       const category = this.getAttribute("data-category")
+      currentCategory = category // 현재 카테고리 상태 갱신
       filterCommunityByCategory(category)
     })
   })
@@ -1744,7 +1894,10 @@ function setupCommunityCategoryTabs() {
 function filterCommunityByCategory(category) {
   let filtered = posts
 
-  if (category && category !== "all") {
+  if (category === "popular") {
+    // 좋아요 10개 이상만, 좋아요 순 내림차순 정렬
+    filtered = [...posts].filter(post => post.likes >= 10).sort((a, b) => b.likes - a.likes)
+  } else if (category && category !== "all") {
     filtered = posts.filter((post) => post.category === category)
   }
 
