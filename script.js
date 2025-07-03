@@ -430,6 +430,68 @@ function setupEventListeners() {
       document.getElementById('mentor-chat-report-modal').style.display = 'none';
     };
   }
+
+  // 멘토 검색 기능
+  function handleMentorSearch() {
+    const query = document.getElementById('mentor-search').value.trim().toLowerCase();
+    const clearBtn = document.getElementById('clear-mentor-search');
+    if (query) {
+      clearBtn.classList.remove('hidden');
+    } else {
+      clearBtn.classList.add('hidden');
+    }
+    if (!query) {
+      renderMentorList(mentors);
+      return;
+    }
+    const filtered = mentors.filter(m => {
+      return (
+        (m.name && m.name.toLowerCase().includes(query)) ||
+        (m.company && m.company.toLowerCase().includes(query)) ||
+        (m.position && m.position.toLowerCase().includes(query)) ||
+        (m.location && m.location.toLowerCase().includes(query)) ||
+        (Array.isArray(m.specialties) && m.specialties.some(s => s.toLowerCase().includes(query)))
+      );
+    });
+    renderMentorList(filtered);
+  }
+
+  function clearMentorSearch() {
+    document.getElementById('mentor-search').value = '';
+    document.getElementById('clear-mentor-search').classList.add('hidden');
+    renderMentorList(mentors);
+  }
+
+  // 이벤트 리스너 등록 (setupEventListeners 내부에 추가 필요)
+  setTimeout(() => {
+    const mentorSearch = document.getElementById('mentor-search');
+    const clearBtn = document.getElementById('clear-mentor-search');
+    const tabAll = document.getElementById('tab-all-mentors');
+    const tabActive = document.getElementById('tab-active-chats');
+    const mentorSearchWrapper = mentorSearch && mentorSearch.closest('div[style*="position:absolute"]');
+    if (mentorSearch) {
+      mentorSearch.addEventListener('input', handleMentorSearch);
+      mentorSearch.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleMentorSearch();
+        }
+      });
+    }
+    if (clearBtn) {
+      clearBtn.addEventListener('click', clearMentorSearch);
+    }
+    // 탭 전환 시 검색창 토글 (mentorSearchWrapper가 실제로 존재할 때만)
+    if (tabAll && tabActive && mentorSearchWrapper) {
+      tabAll.addEventListener('click', () => {
+        mentorSearchWrapper.style.display = '';
+      });
+      tabActive.addEventListener('click', () => {
+        if (!isLoggedIn) return; // 로그인 안 되어 있으면 display를 바꾸지 않음
+        mentorSearchWrapper.style.display = 'none';
+      });
+    }
+  }, 300);
 }
 
 // 커피챗 평가 관련 이벤트 리스너 설정
@@ -626,6 +688,9 @@ function showView(viewName) {
   // 뷰별 초기화
   if (viewName === "mentor-list-view") {
     loadMentors();
+    // 멘토 검색창 항상 보이게
+    const mentorSearchWrapper = document.getElementById('mentor-search') && document.getElementById('mentor-search').closest('div[style*="position:absolute"]');
+    if (mentorSearchWrapper) mentorSearchWrapper.style.display = '';
   } else if (viewName === "chat-view" && selectedMentor) {
     initializeChat();
   } else if (viewName === "community-view") {
@@ -647,6 +712,15 @@ function showView(viewName) {
 
   // 하단 네비게이션 바 이동 및 active 처리
   updateBottomNavActive(viewName);
+  // 채팅/화상통화 화면에서는 하단바 숨김
+  const bottomNav = document.getElementById('bottom-nav');
+  if (bottomNav) {
+    if (viewName === 'chat-view' || document.getElementById('video-call-screen')?.classList.contains('flex')) {
+      bottomNav.style.display = 'none';
+    } else {
+      bottomNav.style.display = '';
+    }
+  }
 }
 
 // 멘토 목록 로드
@@ -1721,6 +1795,10 @@ function showIncomingCallModal() {
 
 // 화상 통화 모달 표시 (기존 버튼 클릭용)
 function showVideoCallModal() {
+  document.getElementById('video-call-modal').style.display = 'flex';
+  // 하단 네비게이션 바 숨김
+  const bottomNav = document.getElementById('bottom-nav');
+  if (bottomNav) bottomNav.style.display = 'none';
   if (!selectedMentor) return
 
   const modal = document.getElementById("video-call-modal")
@@ -1761,51 +1839,35 @@ function showVideoCallModal() {
 
 // 화상 통화 모달 숨기기
 function hideVideoCallModal() {
-  const modal = document.getElementById("video-call-modal")
-  modal.classList.add("hidden")
-  modal.classList.remove("flex")
+  document.getElementById('video-call-modal').style.display = 'none';
+  // 하단 네비게이션 바 복원 (채팅방이 아니면)
+  const bottomNav = document.getElementById('bottom-nav');
+  if (bottomNav && !document.getElementById('chat-view')?.classList.contains('active')) bottomNav.style.display = '';
 }
 
 // 화상 통화 시작
 function startVideoCall() {
-  if (!selectedMentor) return
-
-  hideVideoCallModal()
-
-  const callScreen = document.getElementById("video-call-screen")
-  const mentorNameElement = document.getElementById("call-mentor-name")
-  mentorNameElement.textContent = selectedMentor.name
-
-  callScreen.classList.remove("hidden")
-  callScreen.classList.add("flex")
-
-  isInCall = true
-  callStartTime = new Date()
-  startCallTimer()
-
-  // 아이콘 재초기화
-  setTimeout(() => {
-    initializeLucideIcons()
-  }, 100)
+  document.getElementById('video-call-modal').style.display = 'none';
+  document.getElementById('video-call-screen').classList.remove('hidden');
+  document.getElementById('video-call-screen').classList.add('flex');
+  // 하단 네비게이션 바 숨김
+  const bottomNav = document.getElementById('bottom-nav');
+  if (bottomNav) bottomNav.style.display = 'none';
+  isInCall = true;
+  callStartTime = new Date();
+  startCallTimer();
 }
 
 // 화상 통화 종료
 function endVideoCall() {
-  const callScreen = document.getElementById("video-call-screen")
-  callScreen.classList.add("hidden")
-  callScreen.classList.remove("flex")
-
-  isInCall = false
-  isMuted = false
-  isCameraOff = false
-
-  if (callTimer) {
-    clearInterval(callTimer)
-    callTimer = null
-  }
-
-  // 버튼 상태 초기화
-  updateCallButtons()
+  document.getElementById('video-call-screen').classList.remove('flex');
+  document.getElementById('video-call-screen').classList.add('hidden');
+  // 하단 네비게이션 바 복원 (채팅방이 아니면)
+  const bottomNav = document.getElementById('bottom-nav');
+  if (bottomNav && !document.getElementById('chat-view')?.classList.contains('active')) bottomNav.style.display = '';
+  isInCall = false;
+  callStartTime = null;
+  clearInterval(callTimer);
 }
 
 // 마이크 토글
@@ -1986,6 +2048,7 @@ function checkAuthRequired(action) {
 function showLoginModal() {
     const modal = document.getElementById('login-modal');
     modal.style.display = 'flex';
+    // mentor-search display를 건드리지 않음
 }
 
 // 로그인 모달 숨기기

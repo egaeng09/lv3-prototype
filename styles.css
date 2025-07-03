@@ -1205,7 +1205,7 @@ button {
 }
 
 /* 검색창 스타일 */
-#community-search {
+#community-search, #mentor-search {
   width: 16rem; /* 고정 크기 */
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
   background: white;
@@ -1215,13 +1215,13 @@ button {
   font-size: 0.875rem;
 }
 
-#community-search:focus {
+#community-search:focus, #mentor-search:focus {
   width: 16rem; /* 포커스 시에도 동일한 크기 유지 */
   box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
   border-color: #f97316;
 }
 
-#community-search::placeholder {
+#community-search::placeholder, #mentor-search::placeholder {
   color: #9ca3af;
   font-size: 0.875rem;
 }
