@@ -341,7 +341,7 @@ function setupEventListeners() {
       showLoginModal();
       return;
     }
-    showView("postCreate");
+    showView("post-create-view");
   });
   document.getElementById("cancel-post").addEventListener("click", () => showView("community-view"))
 
@@ -395,7 +395,7 @@ function setupEventListeners() {
               showLoginModal();
               return;
           }
-          showView('postCreate');
+          showView('post-create-view');
       };
   }
 
@@ -1306,7 +1306,7 @@ function likePost(postId) {
 // 게시글 상세 보기
 function openPostDetail(postId) {
   currentPostId = postId
-  showView("postDetail")
+  showView("post-detail-view")
 }
 
 // 게시글 상세 로드
@@ -2100,7 +2100,7 @@ function handleLogout() {
     updateAuthUI();
     
     // 메인 페이지로 이동
-    showView('main');
+    showView('main-view');
     
     // 토스트 알림
     showToast('로그아웃되었습니다.', 'log-out');
