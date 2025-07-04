@@ -1784,8 +1784,7 @@ function showIncomingCallModal() {
     }, 500)
   }
 
-  modal.classList.remove("hidden")
-  modal.classList.add("flex")
+  modal.style.display = "flex"
 
   // 아이콘 재초기화
   setTimeout(() => {
@@ -1828,8 +1827,7 @@ function showVideoCallModal() {
   document.getElementById("cancel-video-call").onclick = hideVideoCallModal
   document.getElementById("start-video-call").onclick = startVideoCall
 
-  modal.classList.remove("hidden")
-  modal.classList.add("flex")
+  modal.style.display = "flex"
 
   // 아이콘 재초기화
   setTimeout(() => {
